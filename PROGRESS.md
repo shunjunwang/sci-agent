@@ -50,7 +50,7 @@ AIGC:
 
 | 模块 | 状态 | 开始日 | 预计完成 | 实际完成 | 负责人 | 备注 |
 |------|------|--------|---------|---------|--------|------|
-| M0 基础设施 | 未开始 | - | 2026-07-06 | - | AI | FastAPI骨架 + PG + Docker Compose |
+| M0 基础设施 | 进行中 | 2026-07-02 | 2026-07-06 | - | AI | FastAPI骨架 + SQLite + Docker Compose + Next.js 前端项目 + Git 多分支 |
 | M1 用户体系 | 未开始 | - | 2026-07-13 | - | AI | 注册/登录/JWT/角色 |
 | M2 文献检索 | 未开始 | - | 2026-07-20 | - | AI | 科应API对接 + 多源聚合架构 |
 | M3 个人知识库 | 未开始 | - | 2026-07-27 | - | AI | 收藏/分类/批注/引用导出 |
@@ -119,7 +119,9 @@ AIGC:
 ### 2026-07-02 (项目启动)
 - **完成**：SPEC.md (API 契约)
 - **完成**：ARCHITECTURE.md / AI_COLLABORATION.md / TEST_STRATEGY.md / PROGRESS.md / RISK_MANAGEMENT.md
-- **计划明日**：M0 基础设施开发启动
+- **完成**：M0 基础设施 — Next.js 前端项目（Next 16.2 / React 19 / Tailwind v4 / shadcn/ui 变量）、Docker Compose（api + frontend 服务）、Git 多分支（main ← ai/* ← feature/*）、环境变量模板同步脚本 scripts/sync_env.py
+- **进行中**：后端数据库从 PostgreSQL 切换为 SQLite + aiosqlite（已完成所有模型文件清理）
+- **计划明日**：M0 收尾 + M1 用户体系开发
 
 ---
 

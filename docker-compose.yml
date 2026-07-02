@@ -1,51 +1,25 @@
-version: "3.9"
-
 services:
-  db:
-    image: postgres:16
-    container_name: sci-agent-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sci_agent
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sciagent-frontend
     ports:
-      - "5432:5432"
-    volumes:
-      - ./docker-data/pgdata:/var/lib/postgresql/data
-    networks:
-      - sci-agent-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d sci_agent"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    depends_on:
+      - api
 
   api:
     build:
       context: ./backend
-    container_name: sci-agent-api
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/sci_agent
-      SECRET_KEY: change-me-in-production-use-a-strong-random-key
-      CORS_ORIGINS: '["http://localhost:3000"]'
-      DEBUG: "true"
-      LOG_LEVEL: INFO
-      ENV: dev
+      dockerfile: Dockerfile
+    container_name: sciagent-api
     ports:
       - "8000:8000"
-    networks:
-      - sci-agent-network
-    healthcheck:
-      test: ["CMD-SHELL", "python -c \"import httpx; httpx.get('http://localhost:8000/api/v1/health').raise_for_status()\""]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-networks:
-  sci-agent-network:
-    driver: bridge
+    environment:
+      DATABASE_URL: "sqlite+aiosqlite:///./sci_agent.db"
+      DEBUG: "true"
+    volumes:
+      - ./backend/sci_agent.db:/app/sci_agent.db
