@@ -1,0 +1,144 @@
+manifest_version: '1.0'
+last_updated: '2026-07-02T10:15:33+08:00'
+total_documents: 20
+documents:
+  AI_COLLABORATION.md:
+    purpose: AI 协同开发规范：5 条铁律、Task 格式标准、分支规范、10 条禁止事项
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: governance
+  AI_CONTEXT.md:
+    purpose: AI 会话入口索引，技术栈摘要，文档索引，AI 行为准则
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies:
+    - docs/MANIFEST.yaml
+    category: governance
+  ARCHITECTURE.md:
+    purpose: 技术架构：18 项技术选型、6 条 ADR、系统架构图
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: core
+  PROGRESS.md:
+    purpose: 开发进度追踪：3 波里程碑、全部模块状态表、每日更新
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: tracking
+  PYTHON_STYLE_GUIDE.md:
+    purpose: 待补充：PYTHON_STYLE_GUIDE.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  RISK_MANAGEMENT.md:
+    purpose: 风险登记册：7 项风险（含缓解、应急、触发条件）
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: governance
+  SPEC.md:
+    purpose: API 契约（唯一真相源）：产品定义、9 模块规格、16 张数据表、统一规范、验收 checklist
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: core
+  TEST_STRATEGY.md:
+    purpose: 测试策略：测试金字塔 70/25/5、AI 自动生成测试用例流程
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: governance
+  UI_LAYOUT.md:
+    purpose: 三栏界面布局规格：10 章完整布局、CSS 变量配色、响应式规则、组件树映射
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: design
+  功能增强方案-对话管理_科研工具_加密格式.md:
+    purpose: 增量功能方案：对话搜索/管理、科研绘图工具扩展、.scix 加密格式设计
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: feature
+  竞品Agent功能参考报告.md:
+    purpose: 待补充：竞品Agent功能参考报告.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  CI-CD与运维基座方案.md:
+    purpose: 待补充：CI-CD与运维基座方案.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  中国学术生态与工具链集成方案.md:
+    purpose: 待补充：中国学术生态与工具链集成方案.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  备份恢复与安全加固方案.md:
+    purpose: 待补充：备份恢复与安全加固方案.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  技术雷达周报.md:
+    purpose: 待补充：技术雷达周报.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  文档治理方案-AI多文档引用可靠性.md:
+    purpose: 多文档环境下 AI 如何可靠引用最新版本的治理规范
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: governance
+  用户体验与终端支持方案.md:
+    purpose: 待补充：用户体验与终端支持方案.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  计费与订阅系统方案.md:
+    purpose: 待补充：计费与订阅系统方案.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  防护体系与模型网关方案.md:
+    purpose: 待补充：防护体系与模型网关方案.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  隐私政策与用户协议.md:
+    purpose: 待补充：隐私政策与用户协议.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+dependency_chains:
+- chain:
+  - SPEC.md
+  - ARCHITECTURE.md
+  - TEST_STRATEGY.md
+  rule: SPEC 变更 → 检查架构和测试策略是否需要同步调整
+- chain:
+  - SPEC.md
+  - UI_LAYOUT.md
+  - 功能增强方案-对话管理_科研工具_加密格式.md
+  rule: SPEC 或 UI 变更 → 检查功能增量方案是否受影响
+- chain:
+  - SPEC.md
+  - PROGRESS.md
+  rule: 模块 API 定义变更 → 更新进度表中对应模块状态
+- chain:
+  - AI_CONTEXT.md
+  - MANIFEST.yaml
+  rule: 任何新文档注册或删除 → 同步更新 AI_CONTEXT.md 的文档索引
