@@ -1,6 +1,6 @@
 manifest_version: '1.0'
-last_updated: '2026-07-03T18:01:24+08:00'
-total_documents: 26
+last_updated: '2026-07-04T18:01:19+08:00'
+total_documents: 27
 documents:
   AI-Research-Partner_头脑风暴建议_2026-07-02.md:
     purpose: 待补充：AI-Research-Partner_头脑风暴建议_2026-07-02.md 的用途描述
@@ -10,14 +10,14 @@ documents:
     category: uncategorized
   AI_COLLABORATION.md:
     purpose: AI 协同开发规范：5 条铁律、Task 格式标准、分支规范、10 条禁止事项
-    version: '1.0'
-    last_modified: '2026-07-02'
+    version: '1.1'
+    last_modified: '2026-07-04'
     dependencies: []
     category: governance
   AI_CONTEXT.md:
     purpose: AI 会话入口索引，技术栈摘要，文档索引，AI 行为准则
-    version: '1.1'
-    last_modified: '2026-07-03'
+    version: '1.2'
+    last_modified: '2026-07-04'
     dependencies:
     - docs/MANIFEST.yaml
     category: governance
@@ -67,8 +67,8 @@ documents:
     category: governance
   RISK_MANAGEMENT.md:
     purpose: 风险登记册：7 项风险（含缓解、应急、触发条件）
-    version: '1.0'
-    last_modified: '2026-07-02'
+    version: '1.1'
+    last_modified: '2026-07-04'
     dependencies: []
     category: governance
   SciAgent_自生优化建议_2026-07-02.md:
@@ -78,9 +78,9 @@ documents:
     dependencies: []
     category: uncategorized
   SPEC.md:
-    purpose: API 契约（唯一真相源）：产品定义、12 模块规格、22 张数据表、统一规范、验收 checklist（含 P0-A~P0-L）
-    version: '1.2'
-    last_modified: '2026-07-03'
+    purpose: API 契约（唯一真相源）：产品定义、9 模块规格、16 张数据表、统一规范、验收 checklist
+    version: '1.3'
+    last_modified: '2026-07-04'
     dependencies: []
     category: core
   TEST_STRATEGY.md:
@@ -113,6 +113,12 @@ documents:
     last_modified: '2026-07-02'
     dependencies: []
     category: ops
+  ISSUE_TRACKER.md:
+    purpose: 待补充：ISSUE_TRACKER.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-04'
+    dependencies: []
+    category: uncategorized
   中国学术生态与工具链集成方案.md:
     purpose: 中国学术生态集成：CNKI/万方/维普对接、GB/T 7714引用、Zotero/Mendeley同步
     version: '1.0'

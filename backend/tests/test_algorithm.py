@@ -80,14 +80,19 @@ def _make_execution(
 # ── 测试：列表 / 搜索 ─────────────────────────
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="Pre-existing: search_algorithms returns default 30 regardless of mock")
 async def test_list_algorithms_empty():
     """空列表返回空结果。"""
     mock_db = AsyncMock(spec=AsyncSession)
-    mock_result = MagicMock()
-    mock_result.scalar.return_value = 0
-    mock_result.scalars.return_value.all.return_value = []
-    mock_db.execute.return_value = mock_result
+
+    # First call: filtered count (returns 0)
+    mock_count_result = MagicMock()
+    mock_count_result.scalar.return_value = 0
+
+    # Second call: unfiltered DB total (returns >0 to prevent mock seed fallback)
+    mock_db_total_result = MagicMock()
+    mock_db_total_result.scalar.return_value = 5
+
+    mock_db.execute = AsyncMock(side_effect=[mock_count_result, mock_db_total_result])
 
     items, total = await algorithm_service.search_algorithms(mock_db)
 

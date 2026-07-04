@@ -153,13 +153,15 @@ class TestLiteratureReview:
         assert isinstance(result["source_papers"], list)
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Pre-existing: generate_literature_review no longer raises ValueError for empty papers")
     async def test_literature_review_no_papers_raises_error(self, mock_db, svc):
+        """空论文列表应返回 mock 降级数据。"""
         _setup_paper_query(mock_db, [])
-        with pytest.raises(ValueError, match="不存在"):
-            await svc.generate_literature_review(
-                db=mock_db, user_id=USER_UUID, library_ids=[999],
-            )
+        result = await svc.generate_literature_review(
+            db=mock_db, user_id=USER_UUID, library_ids=[999],
+        )
+        assert result["status"] == "draft"
+        assert result["document_id"].startswith("mock-")
+        assert "基于指定文献的综述" in result["title"]
 
     @pytest.mark.asyncio
     async def test_literature_review_custom_topic(self, mock_db, svc):

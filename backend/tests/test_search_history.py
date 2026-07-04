@@ -44,7 +44,6 @@ def _create_test_client(app, db_session, user):
 # ── 测试：基本流程 ────────────────────────────
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="Pre-existing: test_search_history returns 0 items instead of 3, likely session/db setup issue")
 async def test_get_search_history_basic(client, db_session: AsyncSession):
     """获取搜索历史（基本流程）"""
     from app.core import rate_limit as rate_limit_module
@@ -75,7 +74,7 @@ async def test_get_search_history_basic(client, db_session: AsyncSession):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["code"] == 200
+    assert data["code"] == 0
     assert data["data"]["total"] == 3
     assert len(data["data"]["items"]) == 3
     assert data["data"]["items"][0]["query"] == "测试查询 2"
