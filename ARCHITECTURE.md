@@ -258,13 +258,23 @@ sci-agent/
 │   └── postgres/
 │       └── init.sql                  # 初始化脚本 (创建扩展)
 │
+├── SPEC.md                           # API 契约 (真相源)
+├── ARCHITECTURE.md                   # 本文档
+├── AI_COLLABORATION.md               # AI 协同规范
+├── TEST_STRATEGY.md                  # 测试策略
+├── PROGRESS.md                       # 进度看板
+├── RISK_MANAGEMENT.md                # 风险管理
+├── AUDIT_REPORT.md                   # 项目审计报告
 ├── docs/                             # 项目管理文档
-│   ├── SPEC.md                       # API 契约 (真相源)
-│   ├── ARCHITECTURE.md               # 本文档
-│   ├── AI_COLLABORATION.md           # AI 协同规范
-│   ├── TEST_STRATEGY.md              # 测试策略
-│   ├── PROGRESS.md                   # 进度看板
-│   └── RISK_MANAGEMENT.md            # 风险管理
+│   ├── adr/                          # 架构决策记录
+│   │   ├── README.md
+│   │   ├── 001-uuid-primary-key.md
+│   │   ├── 002-encryption-dual-backend.md
+│   │   ├── 003-sandbox-isolation.md
+│   │   └── 004-distributed-rate-limiting.md
+│   ├── ISSUE_TRACKER.md
+│   ├── MANIFEST.yaml
+│   └── ...                           # 各类方案文档
 │
 ├── scripts/                          # 工具脚本
 │   ├── dev.ps1                       # 一键启动开发环境 (Windows)

@@ -25,12 +25,13 @@ C 端订阅（99~268 元/年）+ B 端私有化（1.8w~12w）+ 增值分成。
 
 | 文件 | 说明 |
 |------|------|
-| [SPEC.md](<D:\projects\sci-agent\SPEC.md>) | API 契约、数据模型、模块规格 (v1.2) |
+| [SPEC.md](<D:\projects\sci-agent\SPEC.md>) | API 契约、数据模型、模块规格 (v1.4) |
 | [ARCHITECTURE.md](<D:\projects\sci-agent\ARCHITECTURE.md>) | 技术架构、技术选型、ADR |
 | [AI_COLLABORATION.md](<D:\projects\sci-agent\AI_COLLABORATION.md>) | AI 协同铁律、Task 格式、分支规范 |
 | [UI_LAYOUT.md](<D:\projects\sci-agent\UI_LAYOUT.md>) | 三栏界面布局、CSS 变量、响应式 |
 | [TEST_STRATEGY.md](<D:\projects\sci-agent\TEST_STRATEGY.md>) | 测试策略、AI 自动生成测试用例流程 |
 | [PROGRESS.md](<D:\projects\sci-agent\PROGRESS.md>) | 开发进度、模块状态追踪 |
+| [ISSUE_TRACKER.md](<D:\projects\sci-agent\docs\ISSUE_TRACKER.md>) | 代码质量审查问题跟踪、P0-P5 缺陷清单 |
 | [RISK_MANAGEMENT.md](<D:\projects\sci-agent\RISK_MANAGEMENT.md>) | 风险登记册、缓解措施 |
 | [PYTHON_STYLE_GUIDE.md](<D:\projects\sci-agent\PYTHON_STYLE_GUIDE.md>) | Python 编码规范 |
 | [BRAINSTORM.md](<D:\projects\sci-agent\BRAINSTORM.md>) | 优化建议集：9大方向45+条 + Agent架构 + Marvis移植分析 |
@@ -61,7 +62,7 @@ C 端订阅（99~268 元/年）+ B 端私有化（1.8w~12w）+ 增值分成。
 | [中国学术生态与工具链集成方案.md](<D:\projects\sci-agent\docs\中国学术生态与工具链集成方案.md>) | CNKI/Zotero/Mendeley/GB/T 7714 |
 | [用户体验与终端支持方案.md](<D:\projects\sci-agent\docs\用户体验与终端支持方案.md>) | 引导+i18n+帮助中心 |
 | [技术雷达周报.md](<D:\projects\sci-agent\docs\技术雷达周报.md>) | 技术趋势扫描周报 |
-| [AUDIT_REPORT.md](<D:\projects\sci-agent\docs\AUDIT_REPORT.md>) | 项目审计报告 |
+| [AUDIT_REPORT.md](<D:\projects\sci-agent\AUDIT_REPORT.md>) | 项目审计报告 |
 
 ### 任务交付文档 (task-*/)
 
@@ -70,7 +71,7 @@ C 端订阅（99~268 元/年）+ B 端私有化（1.8w~12w）+ 增值分成。
 | M2 文献检索 | [task-pc2-m2/README.md](<D:\projects\sci-agent\task-pc2-m2\README.md>) | 已完成 |
 | M3 个人知识库 | [task-pc2-m3/README.md](<D:\projects\sci-agent\task-pc2-m3\README.md>) | 已完成 |
 | M4 前端Desktop壳 | [task-pc3-m4/README.md](<D:\projects\sci-agent\task-pc3-m4\README.md>) | 已完成 |
-| M6 Docker仿真沙箱 | [task-pc3-m6/README.md](<D:\projects\sci-agent\task-pc3-m6\README.md>) | ⚠️ 端点与代码不一致 |
+| M6 Docker仿真沙箱 | [task-pc3-m6/README.md](<D:\projects\sci-agent\task-pc3-m6\README.md>) | ✅ 已完成 |
 | M7 四级协作空间 | [task-pc2-m7/README.md](<D:\projects\sci-agent\task-pc2-m7\README.md>) | 已完成 |
 | M8 防篡改日志 | [task-pc1-m8/README.md](<D:\projects\sci-agent\task-pc1-m8\README.md>) | 已完成 |
 | 模块9 核心服务增强 | — | ✅ SSE流式进度 + 失败降级 + 学术规范自查 |

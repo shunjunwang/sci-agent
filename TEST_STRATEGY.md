@@ -70,6 +70,8 @@ backend/tests/
 └── test_writing.py              # M5 AI写作
 ```
 
+> ⚠️ **覆盖率缺口**：M9 算法商城（10 个端点，2026-07-02 完成）尚无专用测试文件 `test_marketplace.py`。`backend/app/api/v1/marketplace.py` 已留置但测试覆盖为空。建议下一迭代补充。
+
 ### 2.2 单元测试 (pytest)
 
 **覆盖目标**：
@@ -387,6 +389,19 @@ jobs:
 | 安全测试断言 | XSS/超大请求体测试用 print | 改为真实 assert | P3-07 |
 | 性能测试阈值 | 成功率阈值 80% | 提高到 99% | P3-09 |
 | 测试竞态修复 | conftest 全局修改 app.user_middleware | 改用 dependency_overrides | P3-08 |
+
+---
+
+## 8. 当前测试统计
+
+> 与 PROGRESS.md 联动更新。以下为最近一次全量测试基准值：
+
+| 指标 | 数量 |
+|------|------|
+| 通过 (passed) | 366 |
+| 跳过 (skipped) | 54 |
+| 失败 (failed) | 0 |
+| 总计 | 420 |
 
 ---
 

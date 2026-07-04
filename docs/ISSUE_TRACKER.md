@@ -11,7 +11,7 @@ AIGC:
 
 # SciAgent 代码质量审查 — 问题跟踪与对齐文档
 
-> 审查日期: 2026-07-03 | 基准: SPEC.md v1.3  
+> 审查日期: 2026-07-03 | 基准: SPEC.md v1.4  
 > 本文档作为开发端对齐的唯一真相源，每修复一项请勾选并标注 commit。
 
 ---
@@ -24,7 +24,7 @@ AIGC:
 | API 路由 | D | 4 | 5 | 4 | 5 |
 | Services | C+ | 4 | 9 | 5 | 4 |
 | Tests | C | — | — | — | — |
-| **综合** | **C** | **13** | **25** | **13** | **15** |
+| **综合** | **C** | **13** | **25** | **13** | **11** |
 
 ---
 
@@ -159,12 +159,23 @@ AIGC:
 | P4-01 | ✅ | `app/api/v1/models.py` + `app/main.py` | Model Gateway 11 个端点路由前缀重复，全部 404 | 验证：12 个路由均正常，无双重前缀；该 Bug 在上层调度修复 P4-02 迁移时已自然消除 |
 | P4-02 | ✅ | Alembic | 数据库迁移未应用：`d844407f6050` (head) vs `4cf596d046a2` (current) | 重写迁移脚本兼容 SQLite，`alembic upgrade head` 成功 |
 | P4-03 | ✅ | `app/api/v1/plot.py` / `progress.py` / `app/api/v2/sources.py` | 3 个路由文件未引用 `get_current_user`，潜在数据泄露 | 验证：plot.py 和 progress.py 均已有 `Depends(get_current_user)`；sources.py 为公开数据源列表，无需鉴权 |
-| P4-04 | ⬜ | `app/services/arxiv_service.py:128,199` | `ET.fromstring()` 解析不可信 XML，XXE 攻击风险 | 不在当前任务范围（跳过外部 API 集成验证相关项） |
+| P4-04 | ⬜ | `app/services/arxiv_service.py:128,199` | `ET.fromstring()` 解析不可信 XML，XXE 攻击风险 | 非阻塞（外部 API 集成验证项，不在当前核心功能开发范围） |
 | P4-05 | ✅ | `tests/test_memory_engine.py:221` | `assert True` 假通过，掩盖缺失断言 | 已不存在于当前代码，疑似已在中间轮次修复 |
 | P4-06 | ✅ | `app/services/plot_service.py:389` | `exec()` 动态执行需确认 sandbox 隔离 | 验证：已有注释说明命名空间隔离 + Docker sandbox 前置鉴权 |
 | P4-07 | ✅ | 全项目 | 54 个测试 skip，其中 34 个与 P3-04 认证重构相关 | test_papers.py: 12→6 skip（仅剩 CNKI API 依赖）；test_integration.py: 4 个认证流测试通过；全量 373 passed / 48 skipped |
 | P4-08 | ✅ | 全项目 | ruff + async 静态检查因 IT 策略不可用 | 创建 `pyproject.toml`（pyflakes 配置）+ `scripts/lint.ps1`（ruff→pyflakes 回退） |
 | P4-09 | ✅ | 全项目 | 无 E2E 集成测试通过（全量 skip），无法验证端到端链路 | `tests/test_e2e_smoke.py` 已存在且通过：注册→登录→search→响应格式验证 |
+
+---
+
+## P5 — 全链路验证阻断项（2026-07-04）
+
+| ID | 状态 | 日期 | 问题 | 修复详情 |
+|---|---|---|---|---|
+| P5-01 | ✅ | 2026-07-04 11:27 | DB Schema 迁移：6 张缺失表导致 v3/sharing/preferences/workflow 全部 500 | `__init__.py` 已导入全部 6 个模型；Alembic 迁移 `cb1956979998` 已应用；额外修复 `knowledge_service.py:106` 中 `@staticmethod` 误用 `cls.MAX_PAPERS_PER_USER`。涉及模型：ResearchPreference / TopicMemory / SessionContext / UserProfile / ShareLink / WorkflowInstance |
+| P5-02 | ✅ | 2026-07-04 | 论文搜索外部 API 不可达（30s 超时） | 本地 mock fallback 已就绪：SearchService._local_search 通过 SQL LIKE 查询 papers 表 title/abstract；设置 SEARCH_MOCK_MODE=true 即走本地搜索（修复列名 + JSON 字段解析），端到端 200 验证通过 |
+| P5-03 | ✅ | 2026-07-04 | 无 PDF 文件上传端点 | 新增 POST /api/v3/papers/upload：multipart/form-data 接受 PDF，保存到 UPLOAD_DIR（默认 D:\sci-agent-test-papers），创建 Paper + UserLibrary 记录，端到端 200 验证通过 |
+| P5-VERIFY | ✅ | 2026-07-04 | 全链路验证：注册→登录→上传→搜索→AI写作 全部通过 | 8/8 步骤均 200/201：1.Health OK → 2a.Register 201 → 2b.Login Token → 3.Upload PDF → 4a.Search "cancer" 35条 → 4b.Search 上传论文关键词命中 → 5.AI Writing Plan 生成 → 6.Knowledge Library 正常 |
 
 ---
 
@@ -177,7 +188,8 @@ AIGC:
 | P2 一般 | 13 | 13 | 0 | 0 |
 | P3 建议 | 11 | 11 | 0 | 0 |
 | P4 新发现 | 9 | 8 | 0 | 1 |
-| **合计** | **71** | **70** | **0** | **1** |
+| P5 全链路阻断 | 3 | 3 | 0 | 0 |
+| **合计** | **74** | **73** | **0** | **1** |
 
 ---
 

@@ -11,7 +11,7 @@ AIGC:
 
 # RISK_MANAGEMENT.md — sci-agent 风险管理与应急
 
-> 版本：v1.0 | 最后更新：2026-07-02
+> 版本：v1.1 | 最后更新：2026-07-04
 
 ---
 
@@ -31,7 +31,7 @@ AIGC:
 
 | 编号 | 描述 | 概率 | 影响 | 等级 | 缓解措施 | 应急预案 | 触发条件 |
 |------|------|------|------|------|---------|---------|---------|
-| **R1** | Docker/WSL 环境问题导致 PG 无法启动 | 高 | 高 | 🔴 | 1. 提供详细环境配置文档；2. 准备 Windows 原生 PG 安装包作为备选；3. 在 `scripts/dev.ps1` 中检测环境 | 切换到 Windows 原生 PostgreSQL 16，修改 `DATABASE_URL` 为本地连接 | Docker Compose 启动失败且 30min 内无法修复 |
+| **R1** | Docker/WSL 环境问题导致 PG 无法启动 | 中 | 高 | 🟡 | 1. 提供详细环境配置文档；2. 准备 Windows 原生 PG 安装包作为备选；3. 在 `scripts/dev.ps1` 中检测环境 | 切换到 Windows 原生 PostgreSQL 16，修改 `DATABASE_URL` 为本地连接 | Docker Compose 启动失败且 30min 内无法修复 |
 | **R2** | 科应API 限流或接口变更 | 中 | 高 | 🔴 | 1. 实现本地缓存（懒加载策略）；2. HTTP 重试 + 指数退避；3. 与科应技术支持建立联系 | 启动本地缓存兜底模式，仅返回已缓存文献；新检索提示「服务暂时不可用」 | API 返回 429/503 持续 > 10min |
 | **R3** | C 盘空间不足导致构建失败 | 高 | 中 | 🟡 | 1. Docker data-root 设为 `D:\docker-data`；2. npm cache 设为 `D:\npm-cache`；3. WSL 发行版导出到 D 盘；4. `scripts/check_deps.py` 检查剩余空间 | 清理临时文件 + Docker prune；紧急时可手动扩容 C 盘（DiskPart）或使用 D 盘符号链接 | `npm install` 或 `docker build` 失败 + 错误含 "no space left" |
 | **R4** | AI 生成代码质量问题（模块间接口对不上） | 高 | 中 | 🟡 | 1. SPEC 作为唯一真相源；2. 跨模块修改声明制度；3. CI 类型检查 + 集成测试强制通过 | 回退到上一稳定版本，由人类开发者手动对齐接口后重新分配 | 两个模块联调时出现 3+ 个接口不匹配 |
@@ -48,7 +48,7 @@ AIGC:
 **场景**：Windows 开发环境下 Docker Desktop 依赖 WSL2，WSL2 内核更新或 Windows Update 可能导致 Docker 无法启动、PostgreSQL 容器无法运行。
 
 **预防措施清单**：
-- [ ] Docker Desktop → Settings → Resources → Advanced → Disk image location: `D:\docker-data`
+- [x] Docker Desktop → Settings → Resources → Advanced → Disk image location: `D:\docker-data`
 - [ ] `wsl --export Ubuntu D:\wsl\ubuntu.tar` + `wsl --import Ubuntu D:\wsl\Ubuntu D:\wsl\ubuntu.tar`
 - [ ] `scripts/check_deps.py` 增加 WSL2 / Docker / PG 可用性检查
 - [ ] `docker-compose.yml` 中 PG 数据挂载到宿主机目录（非 Docker volume），方便紧急迁移
@@ -81,8 +81,8 @@ AIGC:
 **场景**：C 盘（系统盘）仅剩不足 10GB，Docker 镜像 + node_modules + npm cache 极易占满。
 
 **预防措施清单**：
-- [ ] `D:\docker-data` 作为 Docker 数据根目录
-- [ ] `npm config set cache D:\npm-cache`
+- [x] `D:\docker-data` 作为 Docker 数据根目录
+- [x] `npm config set cache D:\npm-cache`
 - [ ] `yarn config set cache-folder D:\yarn-cache`
 - [ ] `.gitignore` 中忽略 `node_modules`（各仓独立安装）
 - [ ] 每月执行 `docker system prune -a` 清理无用镜像

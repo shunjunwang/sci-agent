@@ -111,6 +111,17 @@ AIGC:
 
 ---
 
+## 当前测试全量统计
+
+| 指标 | 数量 |
+|------|------|
+| 通过 (passed) | 366 |
+| 跳过 (skipped) | 54 |
+| 失败 (failed) | 0 |
+| 总计 | 420 |
+
+---
+
 ## 3. 当前阻塞项
 
 | 编号 | 阻塞项 | 影响模块 | 发现日期 | 解决方案 | 状态 |
@@ -120,6 +131,23 @@ AIGC:
 ---
 
 ## 4. 每日进度日志
+
+### 2026-07-04 — 文档一致性对齐
+
+- **文档对齐**：根据 DOC_ALIGNMENT_REPORT.md 修复全部 20 项不一致
+  - 幽灵路径修复 8 处（ARCHITECTURE.md, AI_COLLABORATION.md, AI_CONTEXT.md）
+  - MANIFEST.yaml 版本同步 4 份核心文档（SPEC v1.2→v1.4, ARCH v1.0→v1.1, PROGRESS v1.1→v1.3, TEST_STRATEGY v1.1→v1.2）
+  - SPEC.md 新增模块编号映射表（C1）
+  - ISSUE_TRACKER.md P3=15→11 修正（C2）+ P4-04/P5-02/P5-03 状态更新
+  - PROGRESS.md 新增测试全量统计 366/54/0（C3+M7）
+  - TEST_STRATEGY.md 新增测试统计 + M9 覆盖缺口标注（M5+M8）
+  - 新建 ADR-005（前端API通信）+ ADR-006（pgvector向量维度）（M3）
+  - docs/adr/README.md 新增交叉引用表（M4）
+  - AI_CONTEXT.md 新增 ISSUE_TRACKER.md 索引（M9）
+  - RISK_MANAGEMENT.md R1🔴→🟡 R4🟡→🟢 + 预防措施勾选（O5+M10）
+  - AI_COLLABORATION.md v1.0→v1.1 + 变更记录（O4）
+  - 生成修复日志：output/DOC_ALIGNMENT_FIX_LOG.md
+- **基线数据**：366 passed / 54 skipped / 0 failed
 
 ### 2026-07-03 — Docker 构建与环境优化
 

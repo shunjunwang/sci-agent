@@ -11,7 +11,7 @@ AIGC:
 
 # AI_COLLABORATION.md — AI 协同开发规范
 
-> 版本：v1.0 | 最后更新：2026-07-02
+> 版本：v1.1 | 最后更新：2026-07-04
 > 适用场景：1人 + 多AI Agent 协同开发
 > 本文件是**所有AI Agent的协作契约**，违反者将被标记为不可靠Agent
 
@@ -57,9 +57,9 @@ AIGC:
 
 ```
 [AI Agent 在生成任何代码前]
-1. read_text("docs/SPEC.md") → 定位目标模块
-2. read_text("docs/ARCHITECTURE.md") → 确认目录结构和命名规范
-3. read_text("docs/AI_COLLABORATION.md") → 本文档
+1. read_text("SPEC.md") → 定位目标模块
+2. read_text("ARCHITECTURE.md") → 确认目录结构和命名规范
+3. read_text("AI_COLLABORATION.md") → 本文档
 4. 声明：我将实现 SPEC 第 X 章模块 Y 的以下端点：[列表]
 5. 开始生成
 ```
@@ -355,3 +355,12 @@ M9 算法商城 ──→ 依赖 M1 + M6（第3波启动）
 
 *本文档是 sci-agent 项目多 AI 协作的宪法级文件，所有 Agent 在开始任何开发任务前必须全文阅读。*
 *（内容由AI生成，仅供参考）*
+
+---
+
+## 变更记录
+
+| 版本 | 日期 | 变更说明 |
+|------|------|---------|
+| v1.1 | 2026-07-04 | 修正 §2.1 代码生成前置条件的幽灵路径（`docs/` → 根目录）；新增质量门禁协作规范：所有 P0-P3 级变更必须同步更新 ISSUE_TRACKER.md 和 PROGRESS.md；pre-commit + CI 门禁落地后的 Agent 职责明确 |
+| v1.0 | 2026-07-02 | 初始版本：三文件闭环修改规则、Task 格式、分支命名、代码规范铁律 |
