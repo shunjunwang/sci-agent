@@ -195,7 +195,7 @@ AIGC:
 
 | ID | 分类 | 描述 | 状态 | 备注 |
 |----|------|------|------|------|
-| P7-01 | CI/CD | GitHub Actions CI 配置 | ⬜ | GitHub 暂时不可达，待网络恢复后启用 |
+| P7-01 | CI/CD | GitHub Actions CI 配置 | ✅ | CI 配置就绪，GitHub 连通正常，按分支策略触发 |
 | P7-02 | 部署 | Docker Compose 多服务部署 | ⬜ | 配置已验证通过，Docker Desktop daemon 未运行 |
 | P7-03 | 测试 | Skip 测试归因 | ✅ | 18→14，修复 4 个，剩余 12 B+2 C 类需外部环境 |
 | P7-04 | 基准 | 性能基准测试 | ✅ | 详见 output/PERFORMANCE_BASELINE.md，Health 端点需加超时 |
@@ -205,7 +205,7 @@ AIGC:
 | P7-08 | 前端集成 | auth.tsx register 期望注册后自动登录返回 token | ✅ | 后端 register 返回 UserPublic 无 token；已在 register() 内追加 login() |
 | P7-09 | 前端集成 | User 接口字段 username → full_name 全量替换 (6 处) | ✅ | auth.tsx / layout.tsx / settings / login / page.tsx(×2) |
 | P7-10 | 前端集成 | Dashboard API 路径版本号错误 (v1→v2) | ✅ | /api/v1/papers/history → /api/v2/papers/history |
-| P7-11 | 前端集成 | Dashboard /api/v3/library/entries 路由不存在 | ⬜ | 后端无此路由，需对齐 SPEC 后决定实现或替换 |
+| P7-11 | 前端集成 | Dashboard /api/v3/library/entries → /api/v3/papers | ✅ | 路由替换 + data.items 解构适配 |
 | P7-12 | 前端集成 | TypeScript 编译零错误 (含旧备份文件修复) | ✅ | npx tsc --noEmit 通过 |
 
 ---
@@ -221,8 +221,8 @@ AIGC:
 | P4 新发现 | 9 | 9 | 0 | 0 |
 | P5 全链路阻断 | 3 | 3 | 0 | 0 |
 | P6 质量收尾 | 5 | 5 | 0 | 0 |
-| P7 部署与性能 | 12 | 9 | 0 | 3 |
-| **合计** | **91** | **88** | **0** | **3** |
+| P7 部署与性能 | 12 | 11 | 0 | 1 |
+| **合计** | **91** | **90** | **0** | **1** |
 
 ---
 
