@@ -16,11 +16,11 @@ export default function DashboardPage() {
   useEffect(() => {
     Promise.allSettled([
       api.get('/api/v2/papers/history?limit=5').catch(() => ({ data: [] })),
-      api.get('/api/v3/library/entries?limit=5').catch(() => ({ data: [] })),
+      api.get('/api/v3/papers?limit=5').catch(() => ({ data: { items: [] } })),
       api.get('/api/v5/writing/documents?limit=5').catch(() => ({ data: [] })),
     ]).then(([papersR, libR, writingR]) => {
       const papers = (papersR as any).value?.data || [];
-      const libItems = (libR as any).value?.data || [];
+      const libItems = (libR as any).value?.data?.items || [];
       const docs = (writingR as any).value?.data || [];
       setStats({ papers: papers.length, library: libItems.length, writing: docs.length, workflow: 0 });
       setRecentSearches(papers.slice(0, 5));
