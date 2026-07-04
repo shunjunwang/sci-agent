@@ -1,0 +1,168 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: 0a3495d31457bedac983287cb94ad373_8947aebf76f111f19641525400d9a7a1
+    ReservedCode1: tLqcSY+nCEL5CxHKa/1u1reao+ivWAqKT0i0/Fvg8YiHMcK4QWghM21Idgffvf7NKQVCM4Lgz6DPprqVhyjPzEELIm6oD92yFKxONa2hxC4R5HcWACup0XvUKerCrBpQOXdkVMgERcdWiox3k/bQtxHdXoa2pbvCu/t6/F71N1pt8FwiXPsA8aaewfI=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: 0a3495d31457bedac983287cb94ad373_8947aebf76f111f19641525400d9a7a1
+    ReservedCode2: tLqcSY+nCEL5CxHKa/1u1reao+ivWAqKT0i0/Fvg8YiHMcK4QWghM21Idgffvf7NKQVCM4Lgz6DPprqVhyjPzEELIm6oD92yFKxONa2hxC4R5HcWACup0XvUKerCrBpQOXdkVMgERcdWiox3k/bQtxHdXoa2pbvCu/t6/F71N1pt8FwiXPsA8aaewfI=
+---
+
+# SciAgent 代码质量审查 — 问题跟踪与对齐文档
+
+> 审查日期: 2026-07-03 | 基准: SPEC.md v1.3  
+> 本文档作为开发端对齐的唯一真相源，每修复一项请勾选并标注 commit。
+
+---
+
+## 总体评分
+
+| 层 | 评分 | 致命 | 重要 | 一般 | 建议 |
+|---|---|---|---|---|---|
+| Core / Models | C+ | 5 | 11 | 4 | 6 |
+| API 路由 | D | 4 | 5 | 4 | 5 |
+| Services | C+ | 4 | 9 | 5 | 4 |
+| Tests | C | — | — | — | — |
+| **综合** | **C** | **13** | **25** | **13** | **15** |
+
+---
+
+## P0 — 致命缺陷（必须立即修复）
+
+### 安全漏洞
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P0-01 | ✅ | `api/v6/sandbox.py` | 130 | subprocess.run 裸执行任意代码，可读环境变量 | 移除 subprocess，改为 Docker 隔离执行；Docker 不可用时返回 InternalServerError |
+| P0-02 | ✅ | `api/v2/papers.py` | 22-119 | `/search`、`/{paper_id}`、`/{paper_id}/pdf` 无鉴权 | 追加 `current_user = Depends(get_current_user)` |
+| P0-03 | ✅ | `api/v1/scheduled_tasks.py` | 36-73 | GET/POST/DELETE 三个端点完全无鉴权 | 追加 `current_user = Depends(get_current_user)`，DELETE 加所有权校验 |
+| P0-04 | ✅ | `core/config.py` | 21 | SECRET_KEY 硬编码弱默认值 | 删除默认值，使用 `Field(..., min_length=32)` 强制要求 |
+| P0-05 | ✅ | `core/config.py` | 43 | ENCRYPTION_KEY 默认为空字符串 | 启动时检测并抛明确错误 |
+| P0-06 | ✅ | `core/config.py` | 121 | M8_HASH_CHAIN_SALT 默认为空 | 启动时自动生成随机盐并持久化 |
+
+### 运行时崩溃
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P0-07 | ✅ | `services/plot_service.py` | 498-670 | `_NP_AVAILABLE`/`_MPL_AVAILABLE` 不存在，`BytesIO` 未导入 | 改 `_MATPLOTLIB_AVAILABLE`；改用 `io.BytesIO` |
+| P0-08 | ✅ | `services/degradation.py` | 1-313 | 5 个方法标 `async def` 但无 `await`，阻塞 event loop | 移除 `async`，改为纯同步方法 |
+| P0-09 | ✅ | `services/writing_service.py` | 60-80 | MockLLMClient 硬编码假数据，无真实 LLM 适配 | 引入 LLMClient(Protocol) + RealLLMClient + LLM_MODE 环境变量 |
+
+### 架构缺陷
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P0-10 | ✅ | `core/exceptions.py` + `main.py` | 全文件 | HTTP status_code 当作业务 code 返回，与 SPEC 不符 | AppException 新增 `error_code: int`；已映射全部派生类 |
+| P0-11 | ✅ | 跨 6 个路由文件 | — | 响应 `code` 值不一致（200 vs 0） | 全局替换 `code=200` → `code=0` |
+| P0-12 | ✅ | `models/library.py` | 68 | 同一列声明两次 ForeignKey | 已删除重复行 |
+| P0-13 | ✅ | `models/__init__.py` | 54-91 | `__all__` 导出的类未 import，`from *` 触发 NameError | 已移除不存在的模型类 |
+
+---
+
+## P1 — 重要缺陷（本周修复）
+
+### 鉴权与隐私
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P1-01 | ✅ | `api/v9/algorithm.py` | 133-174 | `list_executions` 可查任意用户记录 | 限定 `user_id` 为 `current_user.id` 或加管理员校验 |
+| P1-02 | ✅ | `core/security.py` | 40-50 | JWT payload 不含 `role` 字段 | `create_access_token` 增加 `role` 参数，写入 payload |
+| P1-03 | ✅ | `core/security.py` | 130-147 | `decode_token` 不检查黑名单 | 改为 async，传入 db 时集成 revocation 检查，抛 TokenRevokedError |
+
+### 外部 API 健壮性
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P1-04 | ✅ | `services/keying_service.py` | 全局 | 同步客户端无 timeout，无重试，异常静默吞噬 | 添加 timeout + tenacity 重试 + 抛出专用异常 |
+| P1-05 | ✅ | `services/arxiv_service.py` | 全局 | httpx 无重试机制 | 添加 tenacity 重试 |
+| P1-06 | ✅ | `services/pubmed_service.py` | 全局 | 每个请求新建 AsyncClient，HTMl解析失败静默 pass | 复用单例 AsyncClient + 添加重试 + 结构化错误 |
+| P1-07 | ✅ | `services/cnki_service.py` | 1-120 | 完全硬编码 3 条假数据，无生产模式 | 添加 `CNKI_MOCK_MODE` 环境变量 |
+
+### 错误处理统一
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P1-08 | ✅ | `api/v2/papers.py` | 多处 | HTTPException 绕过统一格式 | 替换为 NotFoundError/BadRequestError 等 |
+| P1-09 | ✅ | `api/v3/knowledge.py` | 多处 | HTTPException 绕过统一格式 | 同上 |
+| P1-10 | ✅ | `api/v5/writing.py` | 多处 | HTTPException 绕过统一格式 | 同上 |
+| P1-11 | ✅ | `api/v6/sandbox.py` | 多处 | HTTPException 绕过统一格式 | 同上 |
+| P1-12 | ✅ | `api/v9/algorithm.py` | 多处 | HTTPException 绕过统一格式 | 同上 |
+
+### 配置与基础设施
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P1-13 | ✅ | `core/config.py` | 17 | 默认 SQLite 与 SPEC PostgreSQL 不一致 | 保留 SQLite 默认值，添加注释说明生产需覆盖 |
+| P1-14 | ✅ | `core/config.py` | 22 | ACCESS_TOKEN 过期 30min，SPEC 要求 120min | 已改为 120 |
+| P1-15 | ✅ | `core/database.py` | 全局 | 无连接池参数 pool_size/max_overflow/pre_ping | 添加 PostgreSQL 连接池配置 |
+| P1-16 | ✅ | `core/rate_limit.py` | 1-108 | 内存令牌桶多 worker 下失效 | Redis Lua 脚本实现分布式令牌桶 |
+| P1-17 | ✅ | `core/encryption.py` | 1-67 | Fernet(AES-128-CBC) 与 SPEC 要求 AES-256-GCM 不一致 | 双后端设计，新增 aes256gcm 选项 |
+| P1-18 | ✅ | `core/scheduler.py` | 80-96 | 两个定时任务为占位函数 | 标记 warnings.warn + logger.warning TODO |
+| P1-19 | ✅ | `core/scheduler.py` | 45-55 | Job 未持久化到 DB，重启丢失 | 配置 SQLAlchemyJobStore + 降级策略 |
+
+### 数据模型修正
+
+| ID | 状态 | 文件 | 行号 | 问题 | 修复方案 |
+|---|---|---|---|---|---|
+| P1-20 | ✅ | `models/workflow.py` | 11 | `user_id: Integer` FK 指向 UUID 主键 | 已改为 `Mapped[uuid.UUID] + UniversalUUID` |
+| P1-21 | ✅ | `models/user.py` | 全局 | UUID vs SPEC BIGSERIAL 主键冲突 | 决策：保留 UUID 并更新 SPEC |
+| P1-22 | ✅ | `models/user.py` | 全局 | 缺失 phone/wechat_union_id/role 等 SPEC 字段 | 补充缺失字段 |
+| P1-23 | ✅ | `models/paper.py` | 全局 | 缺失 paper_uid；embedding 用 JSON 而非 pgvector | 添加 paper_uid 字段 + display_uid 属性；embedding 加 TODO 注释 |
+| P1-24 | ✅ | `models/workspace_m7.py` + `workspace.py` | 全局 | 两套 Workspace 模型并存 | 统一到 M7 版本，废弃旧版 |
+| P1-25 | ✅ | `models/user_20260702_182020_572.py` | 1-151 | 废弃备份文件未清理 | 已删除 |
+
+---
+
+## P2 — 一般缺陷（下迭代）
+
+| ID | 状态 | 文件 | 问题 | 修复方案 |
+|---|---|---|---|---|
+| P2-01 | ✅ | `schemas/common.py` | `status="ok"` 被 Pydantic 静默丢弃 | APIResponse 添加 `model_config={"extra":"forbid"}` |
+| P2-02 | ✅ | `api/v2/papers.py` | 参数名 `source`(单数) 与 SPEC `sources`(复数) 不一致 | 统一为 `sources` |
+| P2-03 | ✅ | 跨多个路由 | 分页响应构建代码重复 | 提取 `build_paginated_response()` 到 schemas/common.py；audit.py / workspace.py 已采用 |
+| P2-04 | ✅ | 多个路由 | `request_id` 缺失影响链路追踪 | 已有 default_factory，确认生效 |
+| P2-05 | ✅ | `core/cache.py` | 方法未标注 async | 已有 async def，确认完成 |
+| P2-06 | ✅ | `core/cli_manager.py` | 无重复注册检测 | register() 增加重名检查 |
+| P2-07 | ✅ | `services/knowledge_service.py` | 无知识库容量限制 | 添加 MAX_PAPERS_PER_USER=5000，add_paper 超限抛 CAPACITY_EXCEEDED |
+| P2-08 | ✅ | `services/memory_engine.py` | 三层记忆无条目数上限 | MAX_RESEARCH_DOMAINS=20, MAX_KEY_PAPERS=100, purge_expired_contexts(>365天) |
+| P2-09 | ✅ | `services/memory_engine.py` | DB session 管理不一致 | 所有方法增加可选 db 参数，_ensure_db() 辅助 |
+| P2-10 | ✅ | `services/search_service.py` | 单源 API 失败无局部降级 | _safe_search 异常返回空结果 + log warning |
+| P2-11 | ✅ | `services/workspace_service.py` | delete_workspace 未清理关联数据 | 显式 DELETE members + invitations |
+| P2-12 | ✅ | `services/workflow_engine.py` + `models/workflow_instance.py` | 工作流进度未持久化 | 新增 WorkflowInstance 模型 + create/get/list/save 方法 |
+| P2-13 | ✅ | `tests/test_critical_services.py` | arxiv/pubmed/degradation/model_gateway 无测试 | 新增 26 个单元测试覆盖四个模块 |
+
+---
+
+## P3 — 建议（技术债）
+
+| ID | 状态 | 文件 | 问题 | 修复方案 |
+|---|---|---|---|---|
+| P3-01 | ✅ | 跨多个文件 | print() 代替 logging | 替换为标准 logging |
+| P3-02 | ✅ | `models/user.py` | 11 个 relationship 全部 cascade 物理删除 | 评估是否需软删除 |
+| P3-03 | ✅ | `api/v2/papers.py` | Query 参数无 max_length | 添加限制 |
+| P3-04 | ✅ | `api/` 路由器 | Depends(get_current_user) 散落各端点 | router 级 dependencies |
+| P3-05 | ✅ | `core/rate_limit.py` | 限流返回 429 无 code 字段 | 统一为 SPEC 格式 `{code: 1004, data: {retry_after: N}}` |
+| P3-06 | ✅ | `core/scheduler.py` | APScheduler job 未持久化 | SQLAlchemyJobStore |
+| P3-07 | ✅ | `tests/test_security.py` | XSS/超大请求体测试用 print 代替断言 | 改为真实 assert |
+| P3-08 | ✅ | `tests/conftest.py` | 全局修改 app.user_middleware 有竞态 | 改用 dependency_overrides |
+| P3-09 | ✅ | `tests/test_performance.py` | 成功率阈值 80% 过低 | 提高到 99% |
+| P3-10 | ✅ | `models/sandbox_job.py` + `algorithm.py` | 旧式 Column 声明风格不一致 | 迁移到 Mapped 新风格 |
+| P3-11 | ✅ | `models/audit_log.py` | `datetime.utcnow` 已废弃 | 替换为 `datetime.now(timezone.utc)` |
+
+---
+
+## 进度统计
+
+| 优先级 | 总数 | 已完成 | 进行中 | 未开始 |
+|---|---|---|---|---|
+| P0 致命 | 13 | 13 | 0 | 0 |
+| P1 重要 | 25 | 25 | 0 | 0 |
+| P2 一般 | 13 | 13 | 0 | 0 |
+| P3 建议 | 11 | 11 | 0 | 0 |
+| **合计** | **62** | **62** | **0** | **0** |
+
+---
+
+> **对齐规范**：修复完成后请在对应行将 `⬜` 改为 `✅`，并附 commit hash。禁止在未经本文档同步的情况下修改优先级。
+*（内容由AI生成，仅供参考）*

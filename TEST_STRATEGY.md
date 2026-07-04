@@ -11,7 +11,7 @@ AIGC:
 
 # TEST_STRATEGY.md — sci-agent 测试策略
 
-> 版本：v1.0 | 最后更新：2026-07-02
+> 版本：v1.2 | 最后更新：2026-07-04
 
 ---
 
@@ -52,7 +52,22 @@ backend/tests/
 ├── test_writing.py              # M5 AI写作
 ├── test_sandbox.py              # M6 沙箱
 ├── test_workspaces.py           # M7 协作空间
-└── test_audit.py                # M8 防篡改日志
+├── test_audit.py                # M8 防篡改日志
+├── test_academic_checker.py     # P0-K 学术规范自查 (17 tests)
+├── test_atomic_trace.py         # P0-D 原子级溯源 (17 tests)
+├── test_conversation_manager.py # P0-E 对话搜索管理 (25 tests)
+├── test_degradation.py          # P0-C 失败降级引擎
+├── test_memory_engine.py        # P0-G 三层记忆引擎
+├── test_memory_api.py           # P0-G 记忆API
+├── test_memory_model.py         # P0-G 记忆模型
+├── test_plot_service.py         # P0-H 科研绘图
+├── test_plot_api.py             # P0-H 科研绘图API
+├── test_progress_manager.py     # P0-B SSE流式进度 (17 tests)
+├── test_scix_crypto.py          # P0-I .scix加密 (10 tests)
+├── test_share_service.py        # P0-I 分享服务 (9 tests)
+├── test_workflow_engine.py      # P0-J 预编排工作流 (12 tests)
+├── test_writing_plan.py         # P0-A Plan模式 (10 tests)
+└── test_writing.py              # M5 AI写作
 ```
 
 ### 2.2 单元测试 (pytest)
@@ -155,6 +170,33 @@ def mock_hunyuan_api(httpx_mock):
         }
     )
 ```
+
+### 2.5 AsyncMock 异步数据库测试模式
+
+P0-G 三层记忆系统大量采用 AsyncMock 模式测试异步数据库操作。核心用法：
+
+```python
+from unittest.mock import AsyncMock, patch
+
+# AsyncMock 是 Python 3.8+ 标准库内置功能，无需额外依赖
+# 适用于 mock async def 方法、async context manager 等场景
+
+@pytest.mark.asyncio
+async def test_memory_store_async():
+    mock_session = AsyncMock()
+    mock_session.execute.return_value = mock_result
+    mock_session.commit = AsyncMock()
+
+    with patch("app.db.get_session", return_value=mock_session):
+        result = await memory_service.store(user_id, content)
+        assert result.id is not None
+        mock_session.commit.assert_awaited_once()
+```
+
+**适用场景**：
+- SQLAlchemy async session 操作
+- asyncpg / databases 等异步数据库驱动
+- 任何 `await` 调用链中的依赖注入
 
 ---
 
@@ -332,6 +374,19 @@ jobs:
 ### 快速开发例外
 
 > 开发中频繁提交（WIP）可在 commit message 中包含 `[skip ci]` 跳过 CI。但 PR 创建时**不允许**跳过。
+
+---
+
+## 7. 质量审查测试改进（2026-07-04）
+
+基于代码质量审查的测试增强：
+
+| 改进项 | 变更前 | 变更后 | 关联 ISSUE |
+|--------|--------|--------|-----------|
+| 关键服务测试覆盖 | arxiv/pubmed/degradation/model_gateway 无测试 | 新增 26 个单元测试 | P2-13 |
+| 安全测试断言 | XSS/超大请求体测试用 print | 改为真实 assert | P3-07 |
+| 性能测试阈值 | 成功率阈值 80% | 提高到 99% | P3-09 |
+| 测试竞态修复 | conftest 全局修改 app.user_middleware | 改用 dependency_overrides | P3-08 |
 
 ---
 

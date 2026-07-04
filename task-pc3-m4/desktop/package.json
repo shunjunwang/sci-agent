@@ -1,0 +1,66 @@
+{
+  "name": "sciagent-desktop",
+  "version": "0.4.0",
+  "description": "SciAgent 桌面应用 - PC3 M4 任务",
+  "main": "main/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:electron\"",
+    "dev:next": "cd ../frontend && npm run dev",
+    "dev:electron": "electron .",
+    "build": "npm run build:next && npm run build:electron",
+    "build:next": "cd ../frontend && npm run build",
+    "build:electron": "electron-builder",
+    "make": "electron-builder --win --mac --linux",
+    "package": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": ["electron", "nextjs", "desktop", "sciagent"],
+  "author": "PC3 AI Agent",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "electron-store": "^10.0.0",
+    "electron-updater": "^6.1.0",
+    "electron-log": "^5.0.0"
+  },
+  "build": {
+    "appId": "com.sciagent.desktop",
+    "productName": "SciAgent",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main/**/*",
+      "preload/**/*",
+      "renderer/**/*",
+      "resources/**/*",
+      "../frontend/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../frontend/.next",
+        "to": "app/.next"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "resources/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "resources/icon.png"
+    }
+  }
+}

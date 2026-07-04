@@ -1,0 +1,29 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff (lint)
+        entry: .venv/Scripts/ruff.exe check --fix
+        language: system
+        types: [python]
+        exclude: ^backend/migrations/|^backend/tests/
+
+      - id: ruff-format
+        name: ruff (format)
+        entry: .venv/Scripts/ruff.exe format --check
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: mypy
+        entry: .venv/Scripts/mypy.exe --config-file=pyproject.toml
+        language: system
+        types: [python]
+        exclude: ^backend/migrations/|^backend/tests/
+        require_serial: true
+
+      - id: bandit
+        name: bandit
+        entry: .venv/Scripts/bandit.exe -c pyproject.toml -r backend/ -x backend/tests
+        language: system
+        pass_filenames: false

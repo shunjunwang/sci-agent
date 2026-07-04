@@ -11,7 +11,7 @@ AIGC:
 
 # ARCHITECTURE.md — sci-agent 技术架构设计文档
 
-> 版本：v1.0 | 最后更新：2026-07-02 | 维护者：AI + 1人
+> 版本：v1.1 | 最后更新：2026-07-04 | 维护者：AI + 1人
 
 ---
 
@@ -585,6 +585,33 @@ volumes:
   - B) 本地 bge-large-zh-v1.5 (1024d)
   - C) 科应API 自带向量
 - **结论**：选 **A**，架构预留 **B/C** 切换能力。pgvector 列定义为 `vector(1536)`，EmbeddingService 抽象接口支持多后端，配置切换 `EMBEDDING_BACKEND=openai|local|keying`。
+
+---
+
+## 9. 质量审查与架构决策（2026-07-04）
+
+基于 62 项代码审查完成后的关键架构决策记录：
+
+### 9.1 已解决的架构分歧
+
+| 决策项 | 原实现 | 最终方案 | 关联 ISSUE |
+|--------|--------|---------|-----------|
+| 主键策略 | UUID vs BIGSERIAL | 保留 UUID (UniversalUUID)，更新 SPEC | P1-21 |
+| 加密算法 | Fernet (AES-128-CBC) | 双后端：AES-256-GCM + Fernet 兼容 | P1-17 |
+| 限流引擎 | 内存令牌桶 | Redis Lua 分布式令牌桶 | P1-16 |
+| 异常体系 | HTTPException 直接抛出 | AppException 统一 error_code | P0-10 |
+| 响应 code | 200 vs 0 不一致 | 统一 code=0 | P0-11 |
+| 沙箱隔离 | subprocess 裸执行 | Docker 隔离（不可用时拒绝） | P0-01 |
+| 数据库连接池 | 无配置 | 添加 pool_size/max_overflow/pre_ping | P1-15 |
+| 调度持久化 | 内存 Job | SQLAlchemyJobStore | P1-19 |
+
+### 9.2 技术债务清理
+
+- 废弃备份文件 user_20260702_182020_572.py 已删除
+- 两套 Workspace 模型已统一到 M7 版本
+- datetime.utcnow 全部迁移到 datetime.now(timezone.utc)
+- 旧式 Column 声明迁移到 Mapped 新风格
+- print() 全部替换为标准 logging
 
 ---
 
