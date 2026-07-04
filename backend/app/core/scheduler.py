@@ -51,7 +51,7 @@ def _build_jobstores() -> dict:
             "SQLAlchemyJobStore 不可用（需安装 apscheduler[sqlalchemy]），"
             "job 将存储在内存中，服务重启后丢失"
         )
-        return {"default": {}}
+        return {"default": {"type": "memory"}}
 
 
 class SchedulerManager:
