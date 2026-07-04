@@ -53,3 +53,25 @@ frontend/.next/
 frontend/out/
 frontend/.env*.local
 frontend/build/
+
+# Desktop app
+desktop/
+
+# Temp output
+output/
+
+# AI generated reports / brainstorm docs
+AI-Research-Partner_*.md
+Mavis_*.md
+SciAgent_*.md
+AUDIT_REPORT.md
+BRAINSTORM.md
+COMPLETION_REPORT.md
+
+# Task working dirs
+task-pc*/
+ai-loop-test/
+
+# Database
+backend/*.db
+*.db
