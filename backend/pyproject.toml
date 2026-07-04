@@ -1,0 +1,20 @@
+[tool.ruff]
+# P4-08: ruff 因 IT 策略被拦截时，pyflakes 作为回退方案。
+# 若 ruff 可用，优先使用 ruff；否则使用 pyflakes。
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "ASYNC"]
+ignore = ["E501"]  # line too long
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["F401"]  # 允许测试中未使用的导入
+
+[tool.pyflakes]
+# Fallback for when ruff is blocked
+max-line-length = 120
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

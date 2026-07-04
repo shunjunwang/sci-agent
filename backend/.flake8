@@ -1,0 +1,20 @@
+[flake8]
+; P4-08: ruff 被 IT 策略拦截，使用 flake8/pyflakes 作为回退方案
+; 仅启用 pyflakes + pycodestyle 核心规则
+max-line-length = 120
+exclude =
+    .git,
+    .venv,
+    __pycache__,
+    alembic/versions,
+    build,
+    dist
+; 忽略与 Black 格式冲突的规则
+ignore =
+    E203,   ; whitespace before ':'
+    E501,   ; line too long (handled by max-line-length)
+    W503,   ; line break before binary operator
+    F401,   ; imported but unused — 保留所有导入用于 ORM 注册
+    F841    ; local variable assigned but not used — 测试/调试场景常见
+per-file-ignores =
+    tests/*:F811

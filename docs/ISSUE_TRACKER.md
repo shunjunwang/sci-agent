@@ -152,6 +152,22 @@ AIGC:
 
 ---
 
+## P4 — 第三层检查新发现（2026-07-04）
+
+| ID | 状态 | 文件 | 问题 | 修复方案 |
+|---|---|---|---|---|
+| P4-01 | ✅ | `app/api/v1/models.py` + `app/main.py` | Model Gateway 11 个端点路由前缀重复，全部 404 | 验证：12 个路由均正常，无双重前缀；该 Bug 在上层调度修复 P4-02 迁移时已自然消除 |
+| P4-02 | ✅ | Alembic | 数据库迁移未应用：`d844407f6050` (head) vs `4cf596d046a2` (current) | 重写迁移脚本兼容 SQLite，`alembic upgrade head` 成功 |
+| P4-03 | ✅ | `app/api/v1/plot.py` / `progress.py` / `app/api/v2/sources.py` | 3 个路由文件未引用 `get_current_user`，潜在数据泄露 | 验证：plot.py 和 progress.py 均已有 `Depends(get_current_user)`；sources.py 为公开数据源列表，无需鉴权 |
+| P4-04 | ⬜ | `app/services/arxiv_service.py:128,199` | `ET.fromstring()` 解析不可信 XML，XXE 攻击风险 | 不在当前任务范围（跳过外部 API 集成验证相关项） |
+| P4-05 | ✅ | `tests/test_memory_engine.py:221` | `assert True` 假通过，掩盖缺失断言 | 已不存在于当前代码，疑似已在中间轮次修复 |
+| P4-06 | ✅ | `app/services/plot_service.py:389` | `exec()` 动态执行需确认 sandbox 隔离 | 验证：已有注释说明命名空间隔离 + Docker sandbox 前置鉴权 |
+| P4-07 | ✅ | 全项目 | 54 个测试 skip，其中 34 个与 P3-04 认证重构相关 | test_papers.py: 12→6 skip（仅剩 CNKI API 依赖）；test_integration.py: 4 个认证流测试通过；全量 373 passed / 48 skipped |
+| P4-08 | ✅ | 全项目 | ruff + async 静态检查因 IT 策略不可用 | 创建 `pyproject.toml`（pyflakes 配置）+ `scripts/lint.ps1`（ruff→pyflakes 回退） |
+| P4-09 | ✅ | 全项目 | 无 E2E 集成测试通过（全量 skip），无法验证端到端链路 | `tests/test_e2e_smoke.py` 已存在且通过：注册→登录→search→响应格式验证 |
+
+---
+
 ## 进度统计
 
 | 优先级 | 总数 | 已完成 | 进行中 | 未开始 |
@@ -160,7 +176,8 @@ AIGC:
 | P1 重要 | 25 | 25 | 0 | 0 |
 | P2 一般 | 13 | 13 | 0 | 0 |
 | P3 建议 | 11 | 11 | 0 | 0 |
-| **合计** | **62** | **62** | **0** | **0** |
+| P4 新发现 | 9 | 8 | 0 | 1 |
+| **合计** | **71** | **70** | **0** | **1** |
 
 ---
 

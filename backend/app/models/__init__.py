@@ -26,6 +26,10 @@ from app.models.conversation import Conversation
 from app.models.writing import WritingDocument, ContentTrace, WritingPlan
 from app.models.algorithm import Algorithm, AlgorithmReview, AlgorithmExecution
 from app.models.token_blacklist import TokenBlacklist
+from app.models.preference import ResearchPreference
+from app.models.memory import TopicMemory, SessionContext, UserProfile
+from app.models.share import ShareLink
+from app.models.workflow import WorkflowInstance
 
 __all__ = [
     # Base
@@ -79,4 +83,15 @@ __all__ = [
     "AlgorithmExecution",
     # Token Blacklist (P0-1)
     "TokenBlacklist",
+    # Preference
+    "ResearchPreference",
+    # Memory
+    "TopicMemory",
+    "SessionContext",
+    # Share
+    "ShareLink",
+    # Workflow
+    "WorkflowInstance",
+    # User
+    "UserProfile",
 ]
