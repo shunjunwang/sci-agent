@@ -8,11 +8,11 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, JSON, String, Text, Uuid, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, JSON, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
 
-from app.core.database import Base
+from app.core.database import Base, UniversalUUID
 
 
 if TYPE_CHECKING:
@@ -45,18 +45,17 @@ class UserLibrary(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
     paper_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
-        ForeignKey("papers.id", ondelete="CASCADE"),
+        UniversalUUID,
         ForeignKey("papers.id", ondelete="CASCADE"),
         nullable=False,
     )

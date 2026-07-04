@@ -10,10 +10,10 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Boolean, DateTime, String, Uuid, func
+from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.core.database import Base, UniversalUUID
 
 if TYPE_CHECKING:
     from app.models.activity import ActivityLog
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from app.models.library import UserLibrary
     from app.models.model_gateway import UserModelConfig
     from app.models.sandbox import SandboxSession
-    from app.models.workspace import Workspace, WorkspaceMember
+    from app.models.workspace import WorkspaceLegacy, WorkspaceMemberLegacy
 
 
 class SubscriptionPlan(str, Enum):
@@ -43,18 +43,37 @@ class SubscriptionPlan(str, Enum):
     ENTERPRISE = "enterprise"
 
 
+class UserRole(str, Enum):
+    """用户角色枚举。
+
+    Attributes:
+        USER: 普通用户。
+        ADMIN: 管理员。
+        SUPER_ADMIN: 超级管理员。
+    """
+
+    USER = "user"
+    ADMIN = "admin"
+    SUPER_ADMIN = "super_admin"
+
+
 class User(Base):
     """用户模型。
+
+    NOTE: SPEC 中记录 id 为 BIGSERIAL，但本实现采用 UUID 以获得更好的分布式唯一性和安全性。
 
     Attributes:
         id: 用户唯一标识（UUID v4，主键）。
         email: 邮箱（唯一，索引）。
         hashed_password: bcrypt 哈希后的密码。
+        phone: 手机号（加密存储，唯一，可空）。
+        wechat_union_id: 微信 UnionID（唯一，可空）。
         full_name: 用户全名。
         institution: 所属机构。
         subscription_plan: 订阅计划（枚举）。
         trial_ends_at: 试用期结束时间（UTC）。
         preferred_language: 首选语言代码，默认 "zh-CN"。
+        role: 用户角色（枚举），默认 "user"。
         is_active: 账号是否启用。
         is_verified: 邮箱是否已验证。
         last_login_at: 最后登录时间（UTC）。
@@ -64,8 +83,9 @@ class User(Base):
 
     __tablename__ = "users"
 
+    # NOTE: SPEC 中记录 id 为 BIGSERIAL，但本实现采用 UUID 以获得更好的分布式唯一性和安全性
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID(),
         primary_key=True,
         default=uuid.uuid4,
     )
@@ -78,6 +98,16 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(
         String(128),
         nullable=False,
+    )
+    phone: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        unique=True,
+        nullable=True,
+    )
+    wechat_union_id: Mapped[Optional[str]] = mapped_column(
+        String(128),
+        unique=True,
+        nullable=True,
     )
     full_name: Mapped[str] = mapped_column(
         String(128),
@@ -103,6 +133,12 @@ class User(Base):
         nullable=False,
         default="zh-CN",
         server_default="zh-CN",
+    )
+    role: Mapped[UserRole] = mapped_column(
+        String(20),
+        nullable=False,
+        default=UserRole.USER,
+        server_default="user",
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean,
@@ -133,6 +169,9 @@ class User(Base):
     )
 
     # ── 关系（back_populates）───────────────────────────────────────────────
+    # TODO(P3-02): 11 个 relationship 均使用 cascade="all, delete-orphan" 物理删除策略。
+    # 后续如需软删除，应改造为被动删除策略（如 on_delete='SET NULL' + 手动清理）。
+    # 当前版本无软删除需求，保留物理删除行为。
     user_library: Mapped[List["UserLibrary"]] = relationship(
         "UserLibrary",
         back_populates="user",
@@ -153,13 +192,13 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    workspaces_owned: Mapped[List["Workspace"]] = relationship(
-        "Workspace",
-        foreign_keys="[Workspace.owner_id]",
+    workspaces_owned: Mapped[List["WorkspaceLegacy"]] = relationship(
+        "WorkspaceLegacy",
+        foreign_keys="[WorkspaceLegacy.owner_id]",
         back_populates="owner",
     )
-    workspace_memberships: Mapped[List["WorkspaceMember"]] = relationship(
-        "WorkspaceMember",
+    workspace_memberships: Mapped[List["WorkspaceMemberLegacy"]] = relationship(
+        "WorkspaceMemberLegacy",
         back_populates="user",
         cascade="all, delete-orphan",
     )

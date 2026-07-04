@@ -6,7 +6,7 @@
 
 import pytest
 
-from app.core.encryption import decrypt_api_key, encrypt_api_key, generate_key
+from app.core.encryption import decrypt_api_key, encrypt_api_key, generate_key, ConfigError
 from app.config import settings
 
 
@@ -64,7 +64,7 @@ class TestEncryption:
     def test_encrypt_empty_key_raises(self, monkeypatch):
         """ENCRYPTION_KEY 为空时应抛 ValueError。"""
         monkeypatch.setattr(settings, "ENCRYPTION_KEY", "")
-        with pytest.raises(ValueError, match="ENCRYPTION_KEY"):
+        with pytest.raises(ConfigError, match="ENCRYPTION_KEY"):
             encrypt_api_key("some-key")
 
     def test_encrypt_special_characters(self):

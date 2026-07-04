@@ -1,7 +1,13 @@
 manifest_version: '1.0'
-last_updated: '2026-07-02T10:15:33+08:00'
-total_documents: 20
+last_updated: '2026-07-03T18:01:24+08:00'
+total_documents: 26
 documents:
+  AI-Research-Partner_头脑风暴建议_2026-07-02.md:
+    purpose: 待补充：AI-Research-Partner_头脑风暴建议_2026-07-02.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
   AI_COLLABORATION.md:
     purpose: AI 协同开发规范：5 条铁律、Task 格式标准、分支规范、10 条禁止事项
     version: '1.0'
@@ -10,8 +16,8 @@ documents:
     category: governance
   AI_CONTEXT.md:
     purpose: AI 会话入口索引，技术栈摘要，文档索引，AI 行为准则
-    version: '1.0'
-    last_modified: '2026-07-02'
+    version: '1.1'
+    last_modified: '2026-07-03'
     dependencies:
     - docs/MANIFEST.yaml
     category: governance
@@ -21,34 +27,66 @@ documents:
     last_modified: '2026-07-02'
     dependencies: []
     category: core
-  PROGRESS.md:
-    purpose: 开发进度追踪：3 波里程碑、全部模块状态表、每日更新
+  AUDIT_REPORT.md:
+    purpose: 待补充：AUDIT_REPORT.md 的用途描述
     version: '1.0'
-    last_modified: '2026-07-02'
+    last_modified: '2026-07-03'
     dependencies: []
-    category: tracking
-  PYTHON_STYLE_GUIDE.md:
-    purpose: 待补充：PYTHON_STYLE_GUIDE.md 的用途描述
+    category: uncategorized
+  BRAINSTORM.md:
+    purpose: 待补充：BRAINSTORM.md 的用途描述
+    version: '1.1'
+    last_modified: '2026-07-03'
+    dependencies:
+    - SPEC.md
+    - ARCHITECTURE.md
+    category: uncategorized
+  COMPLETION_REPORT.md:
+    purpose: 待补充：COMPLETION_REPORT.md 的用途描述
+    version: '1.0'
+    last_modified: '2026-07-03'
+    dependencies: []
+    category: uncategorized
+  Mavis_头脑风暴建议_2026-07-02.md:
+    purpose: 待补充：Mavis_头脑风暴建议_2026-07-02.md 的用途描述
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
     category: uncategorized
+  PROGRESS.md:
+    purpose: 开发进度追踪：3 波里程碑、全部模块状态表、每日更新
+    version: '1.1'
+    last_modified: '2026-07-03'
+    dependencies: []
+    category: tracking
+  PYTHON_STYLE_GUIDE.md:
+    purpose: Python 编码规范：命名约定、导入顺序、类型注解、docstring、代码审查 checklist
+    version: '1.0'
+    last_modified: '2026-07-02'
+    dependencies: []
+    category: governance
   RISK_MANAGEMENT.md:
     purpose: 风险登记册：7 项风险（含缓解、应急、触发条件）
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
     category: governance
-  SPEC.md:
-    purpose: API 契约（唯一真相源）：产品定义、9 模块规格、16 张数据表、统一规范、验收 checklist
+  SciAgent_自生优化建议_2026-07-02.md:
+    purpose: 待补充：SciAgent_自生优化建议_2026-07-02.md 的用途描述
     version: '1.0'
     last_modified: '2026-07-02'
+    dependencies: []
+    category: uncategorized
+  SPEC.md:
+    purpose: API 契约（唯一真相源）：产品定义、12 模块规格、22 张数据表、统一规范、验收 checklist（含 P0-A~P0-L）
+    version: '1.2'
+    last_modified: '2026-07-03'
     dependencies: []
     category: core
   TEST_STRATEGY.md:
     purpose: 测试策略：测试金字塔 70/25/5、AI 自动生成测试用例流程
-    version: '1.0'
-    last_modified: '2026-07-02'
+    version: '1.1'
+    last_modified: '2026-07-03'
     dependencies: []
     category: governance
   UI_LAYOUT.md:
@@ -64,35 +102,35 @@ documents:
     dependencies: []
     category: feature
   竞品Agent功能参考报告.md:
-    purpose: 待补充：竞品Agent功能参考报告.md 的用途描述
+    purpose: 竞品分析：Claude/Notion AI/Zotero/Overleaf/ResearchGate 等竞品功能拆解与差异化对比
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: research
   CI-CD与运维基座方案.md:
-    purpose: 待补充：CI-CD与运维基座方案.md 的用途描述
+    purpose: CI/CD+运维基座：GitHub Actions、Docker 多阶段构建、监控告警、灰度发布回滚
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: ops
   中国学术生态与工具链集成方案.md:
-    purpose: 待补充：中国学术生态与工具链集成方案.md 的用途描述
+    purpose: 中国学术生态集成：CNKI/万方/维普对接、GB/T 7714引用、Zotero/Mendeley同步
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: feature
   备份恢复与安全加固方案.md:
-    purpose: 待补充：备份恢复与安全加固方案.md 的用途描述
+    purpose: 备份恢复与安全加固：PostgreSQL 备份策略、API 安全、依赖漏洞扫描、密钥轮转
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: ops
   技术雷达周报.md:
-    purpose: 待补充：技术雷达周报.md 的用途描述
+    purpose: 技术趋势扫描周报：依赖过期检测、技术栈更新、竞品动态、行业新闻
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: tracking
   文档治理方案-AI多文档引用可靠性.md:
     purpose: 多文档环境下 AI 如何可靠引用最新版本的治理规范
     version: '1.0'
@@ -100,29 +138,29 @@ documents:
     dependencies: []
     category: governance
   用户体验与终端支持方案.md:
-    purpose: 待补充：用户体验与终端支持方案.md 的用途描述
+    purpose: 用户体验设计：新用户引导流程、i18n国际化、多终端适配、帮助中心
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: design
   计费与订阅系统方案.md:
-    purpose: 待补充：计费与订阅系统方案.md 的用途描述
+    purpose: 计费与订阅：C端/B端定价模型、微信/支付宝/对公支付、订阅生命周期管理
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: feature
   防护体系与模型网关方案.md:
-    purpose: 待补充：防护体系与模型网关方案.md 的用途描述
+    purpose: 安全防护与模型网关：防破解、防抄袭检测、Model Gateway 路由与审计
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: ops
   隐私政策与用户协议.md:
-    purpose: 待补充：隐私政策与用户协议.md 的用途描述
+    purpose: 合规文档：PIPL个人信息保护、GDPR合规、用户协议、隐私政策模板
     version: '1.0'
     last_modified: '2026-07-02'
     dependencies: []
-    category: uncategorized
+    category: governance
 dependency_chains:
 - chain:
   - SPEC.md

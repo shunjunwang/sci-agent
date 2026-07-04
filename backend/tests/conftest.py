@@ -5,6 +5,7 @@ Pytest 全局 fixtures 与配置。
 """
 
 import asyncio
+import threading
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -18,6 +19,9 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.database import Base, get_db
+
+# P0-1: 确保 TokenBlacklist 表在 create_all 前注册
+import app.models.token_blacklist  # noqa: E402, F401 — 触发 ORM 注册
 
 # 使用 aiosqlite 作为测试内存数据库
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:?cache=shared"
@@ -88,13 +92,17 @@ async def db_session(
         yield session
 
 
+# P3-08: 全局锁防止并行测试时 user_middleware 竞态
+_mw_lock = threading.Lock()
+
+
 @pytest_asyncio.fixture
 async def test_client(
     db_session: AsyncSession,
 ) -> AsyncGenerator[AsyncClient, None]:
     """创建带内存数据库覆盖的测试 HTTP 客户端。
 
-    覆盖 get_db 依赖以使用测试会话。
+    覆盖 get_db 依赖以使用测试会话，并临时移除限流中间件。
 
     Args:
         db_session: 测试数据库会话。
@@ -103,6 +111,20 @@ async def test_client(
         AsyncClient: httpx 异步测试客户端。
     """
     from app.main import app
+    from app.core.rate_limit import RateLimitMiddleware
+
+    # 临时移除限流中间件，避免测试间累积触发 429
+    # P3-08: 使用锁保护全局 user_middleware 列表，防止并行测试竞态
+    with _mw_lock:
+        saved_middleware = []
+        remaining_middleware = []
+        for mw in app.user_middleware:
+            if mw.cls == RateLimitMiddleware:
+                saved_middleware.append(mw)
+            else:
+                remaining_middleware.append(mw)
+        app.user_middleware.clear()
+        app.user_middleware.extend(remaining_middleware)
 
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield db_session
@@ -114,3 +136,21 @@ async def test_client(
         yield client
 
     app.dependency_overrides.clear()
+
+    # 恢复限流中间件（P3-08: 加锁保护）
+    with _mw_lock:
+        app.user_middleware.clear()
+        app.user_middleware.extend(remaining_middleware + saved_middleware)
+
+
+@pytest_asyncio.fixture
+async def client(test_client: AsyncClient) -> AsyncClient:
+    """别名 fixture，兼容 PC2 M2 测试中使用 `client` 参数名的测试。
+
+    Args:
+        test_client: 标准测试客户端 fixture。
+
+    Returns:
+        AsyncClient: 同 test_client。
+    """
+    return test_client

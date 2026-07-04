@@ -9,11 +9,11 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text, Uuid, func, ForeignKey
+from sqlalchemy import Boolean, DateTime, Integer, String, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
 
-from app.core.database import Base
+from app.core.database import Base, UniversalUUID
 
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class ModelProvider(Base):
     __tablename__ = "model_providers"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
@@ -117,17 +117,17 @@ class UserModelConfig(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
     provider_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("model_providers.id", ondelete="CASCADE"),
         nullable=False,
     )

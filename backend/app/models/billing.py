@@ -11,10 +11,10 @@ from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, DateTime, Enum as SAEnum, Numeric, String, Text, Uuid, func, ForeignKey
+from sqlalchemy import Boolean, DateTime, Enum as SAEnum, Numeric, String, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.core.database import Base, UniversalUUID
 
 if TYPE_CHECKING:
     from app.models.user import User
@@ -56,12 +56,12 @@ class Subscription(Base):
     __tablename__ = "subscriptions"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -134,17 +134,17 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     subscription_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("subscriptions.id", ondelete="SET NULL"),
         nullable=True,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -212,17 +212,17 @@ class Invoice(Base):
     __tablename__ = "invoices"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
     payment_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("payments.id", ondelete="SET NULL"),
         nullable=True,
     )
@@ -269,7 +269,7 @@ class Coupon(Base):
     __tablename__ = "coupons"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )

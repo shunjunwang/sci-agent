@@ -13,6 +13,13 @@ from typing import Any, AsyncGenerator, Optional
 import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+    RetryError,
+)
 
 from app.config import settings
 from app.core.encryption import decrypt_api_key, encrypt_api_key
@@ -26,6 +33,35 @@ from app.schemas.model_gateway import (
 )
 
 logger = logging.getLogger(__name__)
+
+# 重试参数
+_RETRY_ATTEMPTS = 3
+_RETRY_MIN_WAIT = 1
+_RETRY_MAX_WAIT = 10
+
+
+def _is_model_retryable(exc: BaseException) -> bool:
+    """判断模型网关异常是否可重试：仅对 5xx 和 TimeoutException 重试。"""
+    if isinstance(exc, httpx.TimeoutException):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        return 500 <= exc.response.status_code < 600
+    return False
+
+
+# 模型网关重试装饰器
+_model_retry = retry(
+    stop=stop_after_attempt(_RETRY_ATTEMPTS),
+    wait=wait_exponential(multiplier=1, min=_RETRY_MIN_WAIT, max=_RETRY_MAX_WAIT),
+    retry=retry_if_exception_type((httpx.HTTPStatusError, httpx.TimeoutException)),
+    reraise=True,
+    before_sleep=lambda retry_state: logger.warning(
+        "模型网关调用失败（第 %d/%d 次），%s 后重试...",
+        retry_state.attempt_number,
+        _RETRY_ATTEMPTS,
+        f"{retry_state.next_action.sleep:.0f}s" if retry_state.next_action else "即将",
+    ),
+)
 
 
 class ModelGatewayService:
@@ -152,17 +188,20 @@ class ModelGatewayService:
             len(request.messages),
         )
 
-        async with httpx.AsyncClient(timeout=settings.DEFAULT_MODEL_TIMEOUT) as client:
-            response = await client.post(
-                f"{provider.base_url.rstrip('/')}/chat/completions",
-                json=payload,
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                },
-            )
-            response.raise_for_status()
-            data = response.json()
+        url = f"{provider.base_url.rstrip('/')}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+
+        @_model_retry
+        async def _do_chat():
+            async with httpx.AsyncClient(timeout=settings.DEFAULT_MODEL_TIMEOUT) as client:
+                response = await client.post(url, json=payload, headers=headers)
+                response.raise_for_status()
+                return response.json()
+
+        data = await _do_chat()
 
         choice = data["choices"][0]
         usage_data = data.get("usage", {})
@@ -217,23 +256,33 @@ class ModelGatewayService:
             len(request.messages),
         )
 
-        async with httpx.AsyncClient(timeout=settings.DEFAULT_MODEL_TIMEOUT) as client:
-            async with client.stream(
-                "POST",
-                f"{provider.base_url.rstrip('/')}/chat/completions",
-                json=payload,
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                },
-            ) as response:
-                response.raise_for_status()
-                async for line in response.aiter_lines():
-                    if line.startswith("data: "):
-                        yield f"{line}\n\n"
-                    elif line.strip() == "data: [DONE]":
-                        yield "data: [DONE]\n\n"
-                        break
+        url = f"{provider.base_url.rstrip('/')}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+
+        @_model_retry
+        async def _connect_stream():
+            """建立流式连接（含重试），返回已检查状态码的 response。"""
+            client = httpx.AsyncClient(timeout=settings.DEFAULT_MODEL_TIMEOUT)
+            response = await client.send(
+                client.build_request("POST", url, json=payload, headers=headers),
+                stream=True,
+            )
+            response.raise_for_status()
+            return client, response
+
+        client, response = await _connect_stream()
+        try:
+            async for line in response.aiter_lines():
+                if line.startswith("data: "):
+                    yield f"{line}\n\n"
+                elif line.strip() == "data: [DONE]":
+                    yield "data: [DONE]\n\n"
+                    break
+        finally:
+            await client.aclose()
 
     # ── 内部方法 ──────────────────────────────────────────
 

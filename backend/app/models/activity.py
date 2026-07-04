@@ -9,10 +9,10 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, Enum as SAEnum, JSON, String, Text, Uuid, func, ForeignKey
+from sqlalchemy import DateTime, Enum as SAEnum, JSON, String, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.core.database import Base, UniversalUUID
 
 
 if TYPE_CHECKING:
@@ -67,12 +67,12 @@ class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -85,7 +85,7 @@ class ActivityLog(Base):
         nullable=True,
     )
     resource_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         nullable=True,
     )
     detail: Mapped[Optional[dict]] = mapped_column(

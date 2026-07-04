@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db as _get_db
 from app.core.exceptions import UnauthorizedError
-from app.core.security import decode_token
+from app.core.security import decode_token, is_token_revoked
 from app.models.user import User
 
 
@@ -23,6 +23,8 @@ async def get_current_user(
 ) -> User:
     """从 Authorization Header 提取 Bearer Token 并验证用户身份。
 
+    验证流程：解码 Token → 检查黑名单 → 查询用户。
+
     Args:
         authorization: HTTP Authorization 头。
         db: 数据库会话（由 get_db 注入）。
@@ -31,7 +33,7 @@ async def get_current_user(
         User: 当前已认证的用户 ORM 实例。
 
     Raises:
-        UnauthorizedError: Token 缺失、无效或用户不存在。
+        UnauthorizedError: Token 缺失、无效、已撤销或用户不存在。
     """
     if not authorization or not authorization.startswith("Bearer "):
         raise UnauthorizedError(message="缺少有效的认证 Token")
@@ -40,9 +42,22 @@ async def get_current_user(
     if not token:
         raise UnauthorizedError(message="Token 不能为空")
 
-    payload = decode_token(token)
+    payload = await decode_token(token)
     if payload is None:
         raise UnauthorizedError(message="Token 无效或已过期")
+
+    # 检查黑名单
+    jti = payload.get("jti")
+    if jti:
+        from app.models.token_blacklist import TokenBlacklist
+
+        stmt = select(TokenBlacklist).where(
+            TokenBlacklist.token_jti == jti,
+            TokenBlacklist.revoked == True,  # noqa: E712
+        )
+        result = await db.execute(stmt)
+        if result.scalar_one_or_none() is not None:
+            raise UnauthorizedError(message="Token 已被撤销")
 
     user_id_str: Optional[str] = payload.get("sub")
     if not user_id_str:

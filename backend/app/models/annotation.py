@@ -8,10 +8,10 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, DateTime, JSON, String, Text, Uuid, func, ForeignKey
+from sqlalchemy import Boolean, DateTime, JSON, String, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.core.database import Base, UniversalUUID
 
 if TYPE_CHECKING:
     from app.models.paper import Paper
@@ -38,17 +38,17 @@ class Annotation(Base):
     __tablename__ = "annotations"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         primary_key=True,
         default=uuid.uuid4,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
     paper_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+        UniversalUUID,
         ForeignKey("papers.id", ondelete="CASCADE"),
         nullable=False,
     )

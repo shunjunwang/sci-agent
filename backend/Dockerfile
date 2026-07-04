@@ -1,11 +1,5 @@
 FROM python:3.11-slim
 
-# 安装系统编译依赖（psycopg2 / asyncpg 需要 libpq-dev）
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
 # 先复制依赖文件以利用 Docker 层缓存

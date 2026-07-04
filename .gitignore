@@ -29,6 +29,20 @@ htmlcov/
 # Docker / Data
 docker-data/
 
+# Logs
+*.log
+backend/server_stdout.log
+backend/server_stderr.log
+
+# Temp / Ad-hoc test scripts
+temp/
+test_v9_*.py
+backend/test_auth_import.py
+backend/test_deps2.py
+
+# Frontend backup pages
+frontend/src/app/page_*_*.tsx
+
 # OS
 .DS_Store
 Thumbs.db

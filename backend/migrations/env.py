@@ -14,7 +14,7 @@ from app.config import settings
 from app.core.database import Base
 
 # 导入所有模型以确保 metadata 包含全部表定义
-from app.models.user import User  # noqa: F401
+from app.models import activity, annotation, billing, conversation, document, library, model_gateway, paper, sandbox, token_blacklist, user, workspace  # noqa: F401
 
 # Alembic Config 对象
 config = context.config
@@ -26,8 +26,11 @@ if config.config_file_name is not None:
 # 设置 target_metadata 指向 ORM Base
 target_metadata = Base.metadata
 
-# 用应用配置覆盖 alembic.ini 中的 sqlalchemy.url
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# 将异步数据库 URL 转换为同步版本（仅 SQLite 需要）
+db_url = settings.DATABASE_URL
+if "aiosqlite" in db_url:
+    db_url = db_url.replace("aiosqlite", "sqlite")
+config.set_main_option("sqlalchemy.url", db_url)
 
 
 def run_migrations_offline() -> None:
