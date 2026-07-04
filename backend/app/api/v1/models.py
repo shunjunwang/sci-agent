@@ -35,7 +35,7 @@ from app.services.model_gateway import gateway_service
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/models", tags=["Model Gateway"], dependencies=[Depends(get_current_user)])
+router = APIRouter(tags=["Model Gateway"], dependencies=[Depends(get_current_user)])
 
 
 # ── Provider 端点 ──────────────────────────────────────────
