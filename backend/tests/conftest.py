@@ -154,3 +154,36 @@ async def client(test_client: AsyncClient) -> AsyncClient:
         AsyncClient: 同 test_client。
     """
     return test_client
+
+
+@pytest_asyncio.fixture
+async def auth_client(test_client: AsyncClient) -> AsyncClient:
+    """带认证头的测试客户端。
+
+    先注册测试用户并登录获取 token，后续请求自动携带 Bearer。
+
+    Args:
+        test_client: 标准测试客户端 fixture。
+
+    Returns:
+        AsyncClient: 已认证的 httpx 异步客户端。
+    """
+    # 注册测试用户（支持重复注册 400，此时直接走登录流程）
+    await test_client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "test_papers@example.com",
+            "password": "Test@123456",
+            "full_name": "Test Papers User",
+            "institution": "Test University",
+        },
+    )
+    # 登录获取 token
+    login_resp = await test_client.post(
+        "/api/v1/auth/login",
+        json={"email": "test_papers@example.com", "password": "Test@123456"},
+    )
+    assert login_resp.status_code == 200, f"Login failed: {login_resp.status_code} {login_resp.text}"
+    token = login_resp.json()["access_token"]
+    test_client.headers["Authorization"] = f"Bearer {token}"
+    return test_client
