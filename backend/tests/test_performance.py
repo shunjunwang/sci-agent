@@ -115,15 +115,17 @@ async def _run_concurrent_requests(
 
 # ── Tests ───────────────────────────────────────────
 
-@pytest.mark.skip(reason="P3-04 router-level auth: endpoints need Bearer token, perf test needs refactor")
+@pytest.mark.asyncio
 class TestPerformance:
 
     @pytest.mark.asyncio
     async def test_search_endpoint_concurrency(self, test_client: AsyncClient):
         """对 GET /api/v2/papers/search 做 50 并发"""
         conf = ENDPOINT_CONFIGS[0]
+        token = await _get_auth_token(test_client)
         result = await _run_concurrent_requests(
             test_client, conf["url"], conf["method"], conf["concurrency"],
+            headers={"Authorization": f"Bearer {token}"},
         )
         assert result["success_rate"] >= 99, f"Success rate too low: {result['success_rate']:.1f}%"
         print(f"\n  {conf['name']}")
@@ -149,6 +151,7 @@ class TestPerformance:
         return result
 
     @pytest.mark.asyncio
+    @pytest.mark.skip(reason="集成压测需要外部服务（沙箱 / Keying API），本地单测环境不可用")
     async def test_sandbox_endpoint_concurrency(self, test_client: AsyncClient):
         """对 POST /api/v6/sandbox/execute 做 20 并发"""
         conf = ENDPOINT_CONFIGS[2]
@@ -166,6 +169,7 @@ class TestPerformance:
         return result
 
     @pytest.mark.asyncio
+    @pytest.mark.skip(reason="集成压测需要外部服务（沙箱 / Keying API），本地单测环境不可用")
     async def test_all_endpoints_summary(self, test_client: AsyncClient):
         """汇总运行所有端点性能测试"""
         results = {}

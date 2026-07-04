@@ -5,11 +5,10 @@ P2-12: 工作流实例持久化模型
 支持断点续跑——用户关闭浏览器后重新打开可恢复进度。
 """
 
-import uuid as _uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, Integer, JSON, String, Text, func
+from sqlalchemy import DateTime, Integer, JSON, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base

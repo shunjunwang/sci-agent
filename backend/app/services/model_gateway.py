@@ -4,9 +4,7 @@ Model Gateway 服务模块。
 提供模型列表查询、默认模型获取、Chat 转发（含流式）等核心业务逻辑。
 """
 
-import json
 import logging
-import time
 import uuid
 from typing import Any, AsyncGenerator, Optional
 
@@ -18,15 +16,13 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
     retry_if_exception_type,
-    RetryError,
 )
 
 from app.config import settings
-from app.core.encryption import decrypt_api_key, encrypt_api_key
+from app.core.encryption import decrypt_api_key
 from app.models.model_gateway import ModelProvider, UserModelConfig
 from app.schemas.model_gateway import (
     AvailableModel,
-    ChatMessage,
     ChatRequest,
     ChatResponse,
     ChatUsage,

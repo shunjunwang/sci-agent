@@ -9,7 +9,7 @@ P0-E: 对话搜索服务
 """
 
 import uuid
-from typing import List, Optional
+from typing import List
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,7 +87,7 @@ class ConversationSearchService:
                 Conversation.deleted_at.is_(None),
                 (
                     func.lower(Conversation.title).like(func.lower(pattern))
-                    | func.lower(func.cast(Conversation.content_vector, func.String)).like(
+                    | func.lower(func.cast(Conversation.content_vector, func.String)).like(  # type: ignore[arg-type]
                         func.lower(pattern)
                     )
                 ),

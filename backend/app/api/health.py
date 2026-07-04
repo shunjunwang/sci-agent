@@ -5,7 +5,6 @@
 """
 
 import time
-from datetime import datetime, timezone
 
 from fastapi import APIRouter
 

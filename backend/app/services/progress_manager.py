@@ -70,7 +70,7 @@ class ProgressManager:
 
     @property
     def _subscribers(self) -> Dict[str, Set[asyncio.Queue]]:
-        return self.__dict__["_subscribers"]
+        return self.__dict__["_subscribers"]  # type: ignore[no-any-return]
 
     @_subscribers.setter
     def _subscribers(self, value: Dict[str, Set[asyncio.Queue]]) -> None:
@@ -78,7 +78,7 @@ class ProgressManager:
 
     @property
     def _lock(self) -> asyncio.Lock:
-        return self.__dict__["_lock"]
+        return self.__dict__["_lock"]  # type: ignore[no-any-return]
 
     @_lock.setter
     def _lock(self, value: asyncio.Lock) -> None:

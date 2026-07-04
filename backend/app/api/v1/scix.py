@@ -1,10 +1,10 @@
 """
 P0-I: .scix 加密格式 — API 端点
+# mypy: disable-error-code="no-untyped-def"
 """
 
 import secrets
 import string
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import Response
@@ -17,8 +17,6 @@ from app.models.writing import WritingDocument
 from app.schemas.common import APIResponse
 from app.schemas.share import (
     EncryptRequest,
-    EncryptResponse,
-    DecryptRequest,
     KeypairResponse,
     DecryptResponse,
 )
@@ -85,7 +83,7 @@ async def encrypt_document(
         content=scix_bytes,
         media_type="application/octet-stream",
         headers={
-            "Content-Disposition": f'attachment; filename="document.scix"',
+            "Content-Disposition": 'attachment; filename="document.scix"',
             "X-SciX-Password": password,
             "X-SciX-Public-Key": public_pem[:64] + "...",
         },

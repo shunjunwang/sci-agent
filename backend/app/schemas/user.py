@@ -27,7 +27,7 @@ class UserUpdate(BaseModel):
     institution: Optional[str] = Field(None, max_length=256, description="所属机构")
     phone: Optional[str] = Field(None, max_length=20, description="手机号")
     preferred_language: Optional[str] = Field(None, pattern="^[a-z]{2}(-[A-Z]{2})?$", description="首选语言代码")
-    
+
     @validator("preferred_language")
     def validate_language(cls, v):
         if v and v not in ["zh-CN", "en-US", "ja-JP", "ko-KR"]:
@@ -53,7 +53,7 @@ class UserInDB(UserBase):
     last_login_at: Optional[datetime] = Field(None, description="最后登录时间")
     created_at: datetime = Field(..., description="创建时间")
     updated_at: datetime = Field(..., description="最后更新时间")
-    
+
     class Config:
         from_attributes = True
 

@@ -6,7 +6,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -30,7 +30,7 @@ class CitationFormat(str, Enum):
 
 
 class SearchScope(str, Enum):
-    title = "title"
+    title = "title"  # type: ignore[assignment]
     abstract = "abstract"
     notes = "notes"
     all = "all"

@@ -8,18 +8,16 @@ models/annotation.py、models/paper.py 模型。
 字段，对应功能已做降级适配。
 """
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from uuid import UUID, uuid5
 
-from sqlalchemy import select, func, or_, and_
+from sqlalchemy import select, func, or_, and_, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.annotation import Annotation as MainAnnotation
 from app.models.library import UserLibrary as MainUserLibrary
 from app.models.paper import Paper as MainPaper
-from app.models.user import User as MainUser
 from app.schemas.knowledge import (
     CitationFormat,
     CitationGraphOut,
@@ -103,7 +101,7 @@ class KnowledgeService:
             MainUserLibrary.user_id == user_uuid
         )
         current_count = (await db.execute(count_stmt)).scalar() or 0
-        if current_count >= cls.MAX_PAPERS_PER_USER:
+        if current_count >= KnowledgeService.MAX_PAPERS_PER_USER:
             raise ValueError("CAPACITY_EXCEEDED")
 
         existing = await db.execute(
@@ -233,7 +231,7 @@ class KnowledgeService:
             if key == "read_status":
                 entry.is_read = (value != "unread")
             elif key in field_map and field_map[key]:
-                setattr(entry, field_map[key], value)
+                setattr(entry, field_map[key], value)  # type: ignore[arg-type]
             else:
                 setattr(entry, key, value)
 
@@ -278,7 +276,6 @@ class KnowledgeService:
 
         注意：主项目 ORM 无 notes 字段，搜索范围不含笔记。
         """
-        from sqlalchemy import String
 
         user_uuid = UUID(int=user_id)
         q_pattern = f"%{q}%"
@@ -486,7 +483,7 @@ class KnowledgeService:
             p = entry.paper
             if not p:
                 continue
-            paper_meta = {
+            paper_meta: dict[str, object] = {
                 "title": p.title or "",
                 "authors": p.authors if isinstance(p.authors, list) else [],
                 "journal": getattr(p, "journal", "") or "",

@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 引用格式化工具 — 支持 GB/T 7714 / APA 7th / MLA / Chicago / Vancouver / BibTeX。
 
 输入：paper_meta dict（含 title / authors / journal / year / volume / issue / pages / doi）
@@ -56,7 +57,7 @@ def _format_authors(authors: list, fmt: CitationFormat, all_caps: bool = False) 
 
     elif fmt == CitationFormat.mla:
         if len(authors) == 1:
-            return authors[0]
+            return authors[0]  # type: ignore[no-any-return]
         elif len(authors) == 2:
             return f"{authors[0]}, and {authors[1]}"
         else:

@@ -1,7 +1,7 @@
 """initial: full schema v1.0
 
 Revision ID: 000f78bbf966
-Revises: 
+Revises:
 Create Date: 2026-07-02 23:07:20.309427
 
 """

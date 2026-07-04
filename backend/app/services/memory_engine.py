@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 P0-G: 三层记忆系统 — 记忆引擎
 
 自动写入 + 容量衰减 + 按需注入。
@@ -8,7 +9,7 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import AsyncSessionLocal
@@ -290,7 +291,6 @@ class MemoryEngine:
                 parts = []
                 n_queries = len(ctx.search_queries or [])
                 n_papers = len(ctx.papers_read or [])
-                n_writing = len(ctx.writing_sessions or [])
                 n_sandbox = len(ctx.sandbox_runs or [])
                 total_words = sum(
                     w.get("words_written", 0)

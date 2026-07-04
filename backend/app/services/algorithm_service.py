@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 M9 - 算法商城 业务服务
 
 交付物来源: task-pc3-m9
@@ -18,7 +19,6 @@ from sqlalchemy.orm import selectinload
 
 from app.models.algorithm import Algorithm, AlgorithmReview, AlgorithmExecution
 from app.models.user import User
-from app.models.sandbox_job import SandboxJob
 
 
 def _now_utc() -> datetime:
@@ -97,12 +97,12 @@ class AlgorithmService:
             (算法列表, 总数)。
         """
         # ── 1. 先查真实 DB ────────────────────────
-        conditions = [Algorithm.is_public == True]
+        conditions = [Algorithm.is_public]
 
         if keyword:
-            conditions.append(Algorithm.name.ilike(f"%{keyword}%"))
+            conditions.append(Algorithm.name.ilike(f"%{keyword}%"))  # type: ignore[arg-type]
         if category:
-            conditions.append(Algorithm.category == category)
+            conditions.append(Algorithm.category == category)  # type: ignore[arg-type]
 
         count_stmt = select(func.count()).where(and_(*conditions))
         total_result = await db.execute(count_stmt)
@@ -119,7 +119,7 @@ class AlgorithmService:
             stmt = (
                 select(Algorithm)
                 .where(and_(*conditions))
-                .order_by(order_col)
+                .order_by(order_col)  # type: ignore[arg-type]
                 .offset(skip)
                 .limit(limit)
             )

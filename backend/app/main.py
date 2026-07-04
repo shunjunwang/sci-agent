@@ -14,8 +14,6 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1 import router as api_v1_router
 from app.api.health import router as global_health_router
-from app.api.v1.health import router as health_router
-from app.api.v1.models import router as models_router
 from app.api.v1.workspace import router as v1_workspace_router
 from app.api.v1.audit import router as v1_audit_router
 from app.api.v1.preferences import router as v1_preferences_router

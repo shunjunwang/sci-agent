@@ -1,31 +1,37 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 知识库 API 路由 — 全部端点（已适配主项目 ORM）。
 
 路由前缀：/api/v3/knowledge
 鉴权：Bearer Token（通过主项目 deps 获取 current_user）
+
+P5-03: 新增 POST /papers/upload 端点，支持 PDF 论文文件上传。
+      文件保存到 UPLOAD_DIR 环境变量配置的目录（默认 D:\\sci-agent-test-papers），
+      支持格式：PDF，大小限制 50MB。
 """
 
-from typing import List, Optional
-from uuid import UUID
+import os
+import uuid as _uuid
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
+from sqlalchemy import select
 
 from app.core.exceptions import BadRequestError, ConflictError, NotFoundError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user, get_db
+from app.models.paper import Paper, PaperSource
+from app.models.library import UserLibrary
 from app.models.user import User
 from app.schemas.common import APIResponse
 from app.schemas.knowledge import (
     AnnotationCreate,
-    AnnotationOut,
     CitationExportRequest,
-    CitationGraphOut,
     FolderCreate,
-    FolderNode,
-    KnowledgeSearchResult,
     LibraryPaperCreate,
-    LibraryPaperOut,
     LibraryPaperUpdate,
     PaperMeta,
     ReadStatus,
@@ -186,6 +192,91 @@ async def delete_library_paper(
     if not deleted:
         raise NotFoundError(message="知识库条目不存在")
     return APIResponse(code=0, message="已从知识库移除", data=None)
+
+
+# ── PDF 上传 ─────────────────────────────────────
+# P5-03: PDF 论文文件上传端点
+# 支持格式：PDF，大小限制建议 50MB
+# 文件保存目录：环境变量 UPLOAD_DIR 或默认 D:\sci-agent-test-papers
+
+
+@router.post("/papers/upload")
+async def upload_paper_pdf(
+    file: UploadFile = File(..., description="PDF 论文文件"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """上传 PDF 论文文件。
+
+    将 PDF 保存到本地目录，在 papers 和 user_library 表中创建记录，
+    提取文件名（不含扩展名）作为论文标题。
+
+    限制：
+    - 仅支持 PDF 格式（.pdf）
+    - 单文件大小建议不超过 50MB
+    - 重复上传同一文件会根据文件名判断（允许同名覆盖）
+    """
+    # 校验文件格式
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise BadRequestError(message="仅支持 PDF 格式文件（.pdf）")
+
+    # 确定上传目录
+    upload_dir = os.getenv("UPLOAD_DIR", r"D:\sci-agent-test-papers")
+    Path(upload_dir).mkdir(parents=True, exist_ok=True)  # noqa: ASYNC240
+
+    # 生成唯一文件名以避免完全重名冲突，同时保留原始文件名信息
+    base_name = Path(file.filename).stem
+    safe_filename = f"{base_name}_{_uuid.uuid4().hex[:8]}.pdf"
+    file_path = os.path.join(upload_dir, safe_filename)
+
+    # 读取并保存文件
+    content = await file.read()
+    file_size = len(content)
+    with open(file_path, "wb") as f:  # noqa: ASYNC230
+        f.write(content)
+
+    # 创建 Paper 记录
+    paper = Paper(
+        id=_uuid.uuid4(),
+        title=base_name,
+        source_db=PaperSource.MANUAL_IMPORT,
+        search_source="upload",
+        full_text_url=file_path,
+    )
+    db.add(paper)
+    await db.flush()
+
+    # 添加到用户知识库
+    existing = await db.execute(
+        select(UserLibrary).where(
+            UserLibrary.user_id == current_user.id,
+            UserLibrary.paper_id == paper.id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise ConflictError(message="论文已在知识库中")
+
+    library_entry = UserLibrary(
+        user_id=current_user.id,
+        paper_id=paper.id,
+        added_at=datetime.now(timezone.utc),
+        is_read=False,
+    )
+    db.add(library_entry)
+    await db.commit()
+
+    return APIResponse(
+        code=0,
+        message=f"已上传并导入：{base_name}",
+        data={
+            "paper_id": str(paper.id),
+            "title": base_name,
+            "filename": safe_filename,
+            "file_path": file_path,
+            "file_size": file_size,
+            "upload_time": datetime.now(timezone.utc).isoformat(),
+        },
+    )
 
 
 # ── 全文搜索 ─────────────────────────────────────

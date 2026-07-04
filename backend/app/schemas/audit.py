@@ -5,7 +5,6 @@ M8 - 防篡改日志 Schemas
 """
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime
 
 
 class AuditLogQueryParams(BaseModel):

@@ -3,7 +3,6 @@ M5 - AI写作辅助 Pydantic Schemas
 
 请求/响应数据模型，统一使用 APIResponse 包装。
 """
-from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, Field

@@ -5,7 +5,7 @@
 """
 
 from typing import Any, Generic, Optional, TypeVar
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from pydantic import BaseModel, Field
 

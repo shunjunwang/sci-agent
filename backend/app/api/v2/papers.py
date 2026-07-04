@@ -1,9 +1,10 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 PC2 M2 文献检索 API
 """
 
 import math
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select, func as sa_func
@@ -13,7 +14,7 @@ from app.core.exceptions import NotFoundError
 from app.models.paper import SearchHistory
 from app.models.user import User
 from app.schemas.common import APIResponse
-from app.schemas.paper import PaperSearchResult, PaperDetail, SearchHistoryItem, SearchHistoryResponse
+from app.schemas.paper import SearchHistoryItem, SearchHistoryResponse
 from app.services.search_service import SearchService
 
 router = APIRouter()
@@ -31,6 +32,7 @@ async def search_papers(
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """文献搜索 - 支持多源聚合检索、高级过滤"""
     sources_list = None
@@ -47,6 +49,7 @@ async def search_papers(
         doi=doi,
         year_from=year_from,
         year_to=year_to,
+        db=db,
     )
 
     return APIResponse(

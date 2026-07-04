@@ -13,7 +13,7 @@ import io
 import json
 import zipfile
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
@@ -124,7 +124,7 @@ class SciXCrypto:
         private_key = serialization.load_pem_private_key(
             private_key_pem.encode(), password=None
         )
-        signature = private_key.sign(manifest_and_content_hash)
+        signature = private_key.sign(manifest_and_content_hash)  # type: ignore[union-attr,call-arg]
 
         # 6. 打包 ZIP（manifest 写入签名时所用的紧凑格式）
         zip_buffer = io.BytesIO()
@@ -160,7 +160,7 @@ class SciXCrypto:
 
             manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
             content_enc = zf.read("content.enc")
-            signature_data = zf.read("signature.sig")
+            _ = zf.read("signature.sig")
 
             # 读取加密附件
             encrypted_assets: Dict[str, bytes] = {}
@@ -235,7 +235,7 @@ class SciXCrypto:
             public_key_pem.encode()
         )
         try:
-            public_key.verify(signature_data, manifest_and_content_hash)
+            public_key.verify(signature_data, manifest_and_content_hash)  # type: ignore[union-attr,call-arg]
             return True
         except InvalidSignature:
             return False

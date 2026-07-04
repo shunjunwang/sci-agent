@@ -104,7 +104,7 @@ class AtomicTraceEngine:
         Returns:
             去重后的有效引用 ID 列表。
         """
-        ids = set()
+        ids: set[int] = set()
         for match in cls.CITATION_PATTERN.finditer(sentence):
             raw = match.group(1)
             # 展开 [1-3] 范围

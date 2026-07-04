@@ -90,6 +90,7 @@ class Settings(BaseSettings):
     SEARCH_DEFAULT_SOURCES: str = "arxiv,keying,pubmed"  # 默认启用的检索源
     SEARCH_TIMEOUT_SECONDS: int = 30                     # 单次检索超时
     SEARCH_MAX_RESULTS_PER_SOURCE: int = 20              # 每个源最大返回数
+    SEARCH_MOCK_MODE: bool = False                       # P5-02: 本地搜索 mock 模式
 
     # ── M3: 个人知识库 ───────────────────────────────
     KNOWLEDGE_SEARCH_BACKEND: str = "sqlite"        # 全文搜索后端: sqlite / elasticsearch

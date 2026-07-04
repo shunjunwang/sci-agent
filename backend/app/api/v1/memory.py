@@ -2,15 +2,13 @@
 P0-G: 三层记忆系统 — API 端点
 """
 
-import uuid
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user, get_db
-from app.models.memory import UserProfile, TopicMemory, SessionContext
+from app.models.memory import UserProfile, TopicMemory
 from app.models.user import User
 from app.schemas.common import APIResponse
 from app.schemas.memory import (
@@ -18,10 +16,6 @@ from app.schemas.memory import (
     UserProfileResponse,
     TopicCreate,
     TopicUpdate,
-    TopicResponse,
-    UserContext,
-    RecentContext,
-    SessionContextResponse,
 )
 from app.services.memory_engine import memory_engine
 

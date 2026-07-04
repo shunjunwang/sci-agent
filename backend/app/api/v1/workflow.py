@@ -1,8 +1,8 @@
 """
 P0-J: 预编排工作流 — API 端点
+# mypy: disable-error-code="no-untyped-def"
 """
 
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select

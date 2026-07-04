@@ -5,7 +5,6 @@ M6 - Docker仿真沙箱 Schemas
 """
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
-from datetime import datetime
 
 
 class SandboxExecuteRequest(BaseModel):

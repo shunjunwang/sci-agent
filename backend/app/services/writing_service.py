@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 M5 - AI写作辅助 业务服务
 
 核心约束：所有 AI 生成内容必须包含 [AI生成] 溯源标记。本服务通过
@@ -11,12 +12,11 @@ P0-F: LaTeX + Mermaid 渲染支持
 P0-09: LLMClient 抽象基类 + RealLLMClient (model_gateway 适配层)
   - LLM_MODE 环境变量: mock (默认) / real
 """
-import json
 import os
 import re
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional, Protocol, Tuple, runtime_checkable
+from typing import List, Optional, Protocol, runtime_checkable
 
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +29,7 @@ from app.models.paper import Paper
 from app.services.degradation import degradation_service
 
 # P0-D: 原子级溯源引擎
-from app.services.trace_engine import AtomicTraceEngine, TraceResult
+from app.services.trace_engine import AtomicTraceEngine
 
 
 # ── 溯源标记强制器 ───────────────────────────────────
@@ -109,7 +109,7 @@ class MockLLMClient:
         if "润色" in prompt or "polish" in prompt.lower():
             return f"[润色后] {prompt.split('润色以下文本')[-1].split('【待润色】')[-1].strip()[:100]} ...（学术表达优化完成）"
         elif "降重" in prompt or "rephrase" in prompt.lower():
-            return f"[降重后] 对原文进行了句式结构调整和同义表达替换。原始语义已被保留。"
+            return "[降重后] 对原文进行了句式结构调整和同义表达替换。原始语义已被保留。"
         elif "综述" in prompt or "review" in prompt.lower():
             return """## 引言
 
@@ -277,7 +277,6 @@ class WritingService:
             return []
 
         blocks = []
-        remaining = content
 
         # 合并模式：先匹配 mermaid 和 LaTeX 块，其余归为 text
         combined_pattern = re.compile(
@@ -295,7 +294,7 @@ class WritingService:
                 if text_chunk:
                     blocks.append({"type": "text", "content": text_chunk})
 
-            matched_text = match.group(0)
+            _matched = match.group(0)
             if match.group(1):  # LaTeX 块级 $$...$$
                 inner = match.group(1).strip("$").strip()
                 blocks.append({"type": "latex", "content": inner})
@@ -428,9 +427,9 @@ class WritingService:
             doc = await self._handle_generation(
                 db, user_id, f"{topic}——文献综述", content, papers, prompt, "生成",
             )
-        except Exception as exc:
+        except Exception:
             # P0-C: DB 写入失败 → 降级返回内容但不持久化
-            degraded = await degradation_service.writing_timeout_degraded(
+            degraded = await degradation_service.writing_timeout_degraded(  # type: ignore[misc]
                 document_title=f"{topic}——文献综述",
                 completed_sections=[
                     {"title": s, "content": content}

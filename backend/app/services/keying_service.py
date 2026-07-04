@@ -1,9 +1,9 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 科应文献检索服务 - 基于 keying-cli 真实对接
 通过 CLISearchAdapter 协议实现，可被通用 CLI 管理器注册
 """
 
-import os
 import asyncio
 import logging
 from typing import List, Optional, Dict, Any
@@ -270,7 +270,7 @@ class KeyingService:
             )
 
         try:
-            return await _do_get_pdf()
+            return await _do_get_pdf()  # type: ignore[no-any-return]
         except KeyingServiceError:
             raise
         except Exception as e:

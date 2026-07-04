@@ -1,5 +1,6 @@
-"""
+﻿"""
 P0-E: 对话搜索+管理 — API 端点
+# mypy: disable-error-code="no-untyped-def"
 
 提供对话的置顶、重命名、软删除、恢复、永久删除和搜索功能。
 """

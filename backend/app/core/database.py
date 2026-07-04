@@ -10,7 +10,7 @@ import uuid
 from typing import Any, AsyncGenerator, Optional
 
 from sqlalchemy import String, types
-from sqlalchemy.dialects import postgresql, sqlite
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import (
     AsyncSession,

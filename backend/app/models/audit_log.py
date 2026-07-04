@@ -7,10 +7,9 @@ M8 - 防篡改日志 ORM 模型
 """
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
 
 from sqlalchemy import (
-    Column, String, Text, Integer, DateTime, JSON, Index,
+    Column, String, Integer, DateTime, JSON, Index,
 )
 
 from app.core.database import Base

@@ -14,9 +14,7 @@ M7 - 四级协作空间 ORM 模型 [DEPRECATED]
 注意: 本文件内容已统一到 models/workspace.py，类名已更名。
       新代码请从 app.models.workspace 导入 Workspace / WorkspaceMember / Invitation。
 """
-import uuid
 from datetime import datetime, timezone
-from typing import Optional
 
 from sqlalchemy import (
     Column, String, Text, Integer, DateTime, ForeignKey, UniqueConstraint,

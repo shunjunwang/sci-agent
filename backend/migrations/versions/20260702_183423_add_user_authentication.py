@@ -1,7 +1,7 @@
 """add_user_authentication
 
 Revision ID: 20260702_183423
-Revises: 
+Revises:
 Create Date: 2026-07-02T18:34:23.849472
 
 """

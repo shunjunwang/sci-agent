@@ -78,7 +78,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Reverse only structural changes."""
-    is_sqlite = _is_sqlite()
 
     # Drop new columns (SQLite doesn't support DROP COLUMN natively either,
     # but modern versions (3.35+) do via ALTER TABLE ... DROP COLUMN)

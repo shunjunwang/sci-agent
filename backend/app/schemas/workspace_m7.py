@@ -5,7 +5,6 @@ M7 - 四级协作空间 Schemas
 """
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
-from datetime import datetime
 
 
 class WorkspaceCreateRequest(BaseModel):

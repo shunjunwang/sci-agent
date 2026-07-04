@@ -1,8 +1,8 @@
-"""
+﻿"""
 P0-I: 分享模式 — API 端点
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user, get_db
@@ -13,7 +13,7 @@ from app.schemas.share import (
     ShareLinkResponse,
     ShareVerifyResponse,
 )
-from app.services.share_service import share_service, ShareServiceError
+from app.services.share_service import share_service
 
 router = APIRouter(prefix="/share", tags=["分享模式"])
 
@@ -30,7 +30,7 @@ async def create_share(
     """创建受控分享链接。"""
     share = await share_service.create_share_link(
         db=db,
-        user_id=current_user.id,
+        user_id=current_user.id,  # type: ignore[arg-type]
         document_id=req.document_id,
         expires_hours=req.expires_hours,
         max_access_count=req.max_access_count,
@@ -91,7 +91,7 @@ async def list_my_shares(
     db: AsyncSession = Depends(get_db),
 ) -> APIResponse[list]:
     """获取当前用户的分享链接列表。"""
-    shares = await share_service.list_my_shares(db, current_user.id)
+    shares = await share_service.list_my_shares(db, current_user.id)  # type: ignore[arg-type]
     items = [
         {
             "token": s.token,
@@ -120,7 +120,7 @@ async def revoke_share(
     db: AsyncSession = Depends(get_db),
 ) -> APIResponse[dict]:
     """撤销分享链接。"""
-    ok = await share_service.revoke_share(db, token, current_user.id)
+    ok = await share_service.revoke_share(db, token, current_user.id)  # type: ignore[arg-type]
     if not ok:
         raise HTTPException(status_code=404, detail="分享链接不存在")
     return APIResponse(code=200, message="已撤销", data={"revoked": True})

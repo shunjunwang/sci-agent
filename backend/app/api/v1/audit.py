@@ -1,5 +1,6 @@
-"""
+﻿"""
 M8 - 防篡改日志 API v1 路由
+# mypy: disable-error-code="no-untyped-def"
 
 交付物来源: task-pc1-m8
 端点: GET /admin/activity-logs, GET /admin/activity-logs/verify, GET /admin/activity-logs/statistics
@@ -8,12 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_db, get_current_user
-from app.schemas.audit import AuditLogQueryParams, VerifyQueryParams, StatisticsQueryParams
 from app.schemas.common import APIResponse, build_paginated_response
 from app.services.audit_service import audit_service
 from app.models.user import User
 
-from app.api.v1.deps import get_current_user
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 P0-H: 科研绘图 Skill — API 端点
 """
 
@@ -16,7 +16,6 @@ from app.schemas.plot import (
     VolcanoRequest,
     CustomPlotRequest,
     PlotResponse,
-    TemplateInfo,
 )
 from app.services.plot_service import plot_service, PlotServiceError
 
@@ -162,7 +161,7 @@ async def enhance_plot(
     try:
         config = {"dpi": dpi}
         result = plot_service.auto_enhance(image_bytes, config)
-        return _handle_plot(result)
+        return _handle_plot(result)  # type: ignore[arg-type]
     except PlotServiceError as e:
         raise HTTPException(status_code=422, detail=e.detail)
 
@@ -177,7 +176,7 @@ async def figure_panel(
 ) -> APIResponse[PlotResponse]:
     """多图拼接面板。"""
     try:
-        label_list = [l.strip() for l in labels.split(",") if l.strip()]
+        label_list = [label.strip() for label in labels.split(",") if label.strip()]
         if not label_list:
             label_list = [f"({chr(97 + i)})" for i in range(len(images))]
 
@@ -185,7 +184,7 @@ async def figure_panel(
         result = plot_service.create_figure_panel(
             image_data, layout=(rows, cols), labels=label_list, dpi=dpi,
         )
-        return _handle_plot(result)
+        return _handle_plot(result)  # type: ignore[arg-type]
     except PlotServiceError as e:
         raise HTTPException(status_code=422, detail=e.detail)
 
@@ -197,7 +196,7 @@ async def grayscale_plot(
     """转换为灰度图。"""
     try:
         result = plot_service.convert_to_grayscale(image_bytes)
-        return _handle_plot(result)
+        return _handle_plot(result)  # type: ignore[arg-type]
     except PlotServiceError as e:
         raise HTTPException(status_code=422, detail=e.detail)
 

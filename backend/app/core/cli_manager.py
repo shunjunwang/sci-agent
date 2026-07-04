@@ -1,9 +1,9 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 PC2 M2 通用 CLI 服务管理器
 不写死任何特定 CLI 工具，支持动态注册和扩展
 """
 
-import os
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 

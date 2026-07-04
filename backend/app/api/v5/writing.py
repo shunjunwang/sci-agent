@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 M5 - AI写作辅助 API 端点 (v5)
 
 8 个端点，所有端点需要 get_current_user 依赖。
@@ -21,8 +22,7 @@ from app.schemas.writing import (
     FormatJournalRequest, FormatJournalResponse,
     InsertCitationRequest, InsertCitationResponse,
     TraceDetailResponse,
-    WritingDocumentListResponse, WritingDocumentItem,
-    WritingDocumentUpdateRequest, WritingDocumentUpdateResponse,
+    WritingDocumentListResponse, WritingDocumentUpdateRequest, WritingDocumentUpdateResponse,
     # P0-A: Plan 模式
     PlanCreate, PlanResponse, SectionGenerate, SectionResult, FinalizeResponse,
     # P0-D: 原子级溯源

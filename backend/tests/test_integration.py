@@ -77,7 +77,7 @@ class TestFullIntegrationFlow:
         auth["token"] = token_data["access_token"]
         auth["refresh_token"] = token_data.get("refresh_token", "")
         auth_headers = {"Authorization": f"Bearer {auth['token']}"}
-        print(f"  PASS Step 2: Login successful")
+        print("  PASS Step 2: Login successful")
 
         # ── Step 3: 搜索文献 (arxiv) ──
         resp = await c.get("/api/v2/papers/search", params={
@@ -151,7 +151,7 @@ class TestFullIntegrationFlow:
         polish_data = resp.json()
         assert polish_data.get("code") == 0
         assert "polished_text" in polish_data.get("data", {})
-        print(f"  PASS Step 8: Polish completed")
+        print("  PASS Step 8: Polish completed")
 
         # ── Step 9: 降重 ──
         resp = await c.post("/api/v5/writing/rephrase", json={
@@ -174,7 +174,7 @@ class TestFullIntegrationFlow:
         fmt_data = resp.json()
         assert fmt_data.get("code") == 0
         assert fmt_data.get("data", {}).get("journal") == "Nature"
-        print(f"  PASS Step 10: Journal formatting for Nature")
+        print("  PASS Step 10: Journal formatting for Nature")
 
         # ── Step 11: 插入引用 ──
         resp = await c.post("/api/v5/writing/insert-citation", json={
@@ -187,7 +187,7 @@ class TestFullIntegrationFlow:
         cite_data = resp.json()
         assert cite_data.get("code") == 0
         assert "inserted_citation" in cite_data.get("data", {})
-        print(f"  PASS Step 11: Citation inserted")
+        print("  PASS Step 11: Citation inserted")
 
         # ── Step 12: 生成文献综述 ──
         resp = await c.post("/api/v5/writing/literature-review", json={
@@ -235,7 +235,7 @@ class TestFullIntegrationFlow:
             auth["alg_exec_id"] = alg_exec_id
             print(f"  PASS Step 15: Algorithm executed, exec_id={alg_exec_id}")
         else:
-            print(f"  SKIP Step 15: No algorithms available to execute")
+            print("  SKIP Step 15: No algorithms available to execute")
 
         # ── Step 16: 查看执行历史 ──
         resp = await c.get("/api/v9/executions", params={"page_size": 5}, headers=auth_headers)
@@ -245,7 +245,7 @@ class TestFullIntegrationFlow:
         hist_total = hist_data.get("data", {}).get("total", 0)
         print(f"  PASS Step 16: Execution history, total={hist_total}")
 
-        print(f"\n=== ALL 16 STEPS PASSED ===")
+        print("\n=== ALL 16 STEPS PASSED ===")
 
 
 class TestChainIDPassing:

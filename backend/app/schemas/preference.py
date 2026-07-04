@@ -2,7 +2,6 @@
 科研偏好配置 Schema — 请求/响应模型。
 """
 
-from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field

@@ -8,7 +8,7 @@ P0-K: 学术规范自查服务
 """
 import re
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 # ── 数据模型 ───────────────────────────────────────
 

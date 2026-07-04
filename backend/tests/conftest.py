@@ -5,26 +5,49 @@ Pytest 全局 fixtures 与配置。
 """
 
 import asyncio
+import os
 import threading
 from collections.abc import AsyncGenerator
+from pathlib import Path
 from typing import Any
 
-import pytest
-import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import (
+# ── 环境修复：确保 .env 从 backend/ 目录加载 ─────────────────
+# pytest 可能从项目根目录运行，导致 pydantic-settings 找不到 backend/.env。
+# 读取 .env 中 SECRET_KEY 并注入环境变量，确保 JWT 签名可用。
+_BACKEND_DIR = Path(__file__).resolve().parent.parent
+_ENV_FILE = _BACKEND_DIR / ".env"
+if _ENV_FILE.exists():
+    for line in _ENV_FILE.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, _, val = line.partition("=")
+            key = key.strip()
+            if key and key not in os.environ:  # 不覆盖已有环境变量
+                # 移除引号
+                val = val.strip().strip('"').strip("'")
+                os.environ[key] = val
+
+import pytest  # noqa: E402
+import pytest_asyncio  # noqa: E402
+from httpx import ASGITransport, AsyncClient  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
 
-from app.core.database import Base, get_db
+from app.core.database import Base, get_db  # noqa: E402
 
 # P0-1: 确保 TokenBlacklist 表在 create_all 前注册
 import app.models.token_blacklist  # noqa: E402, F401 — 触发 ORM 注册
 
-# 使用 aiosqlite 作为测试内存数据库
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:?cache=shared"
+# P3-07: 确保所有 ORM 模型在 create_all 前注册，解决 security/performance 测试
+# 因 create_all 早于 app.main 导入导致部分表缺失的问题。
+import app.models  # noqa: E402, F401
+
+# 使用文件型 SQLite 作为测试数据库（:memory: 在 aiosqlite 中存在 per-connection 隔离问题）
+_TEST_DB_PATH = Path(__file__).resolve().parent / "test_sci_agent.db"
+TEST_DATABASE_URL = f"sqlite+aiosqlite:///{_TEST_DB_PATH.as_posix()}"
 
 
 @pytest.fixture(scope="module")
@@ -44,6 +67,9 @@ async def test_engine() -> Any:
     Yields:
         AsyncEngine: 测试引擎实例。
     """
+    # 确保所有 ORM 模型已注册到 Base.metadata 再建表
+    import app.models  # noqa: E402, F811 — 触发所有模型导入
+
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 
     async with engine.begin() as conn:
@@ -57,6 +83,13 @@ async def test_engine() -> Any:
     yield engine
 
     await engine.dispose()
+
+    # 清理测试数据库文件
+    if _TEST_DB_PATH.exists():
+        try:
+            _TEST_DB_PATH.unlink()
+        except OSError:
+            pass  # 文件可能被其他进程锁定，忽略
 
 
 @pytest_asyncio.fixture(loop_scope="module")

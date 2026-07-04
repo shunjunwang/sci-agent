@@ -73,7 +73,6 @@ class TestInferenceKeywords:
         """"结果表明..." → CONCLUSION_FROM"""
         content = "实验结果表明该模型在ImageNet上超越了SOTA。"
         result = AtomicTraceEngine.trace_section(content)
-        conclusion = [a for a in result.annotations if a.trace_type == TraceType.CONCLUSION_FROM]
         # 可能归到 conclusion 或 ai_original（取决于置信度）
         assert result.total_sentences >= 1
 
@@ -81,7 +80,6 @@ class TestInferenceKeywords:
         """"综合以上..." → AI_SYNTHESIS"""
         content = "综合以上文献的研究成果，可以得出以下结论。"
         result = AtomicTraceEngine.trace_section(content)
-        synthesis = [a for a in result.annotations if a.trace_type == TraceType.AI_SYNTHESIS]
         # 在 Mock 模式下不一定保证命中，验证结果完整性即可
         assert result.total_sentences >= 1
 

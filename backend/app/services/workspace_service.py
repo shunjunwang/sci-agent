@@ -142,10 +142,10 @@ class WorkspaceService:
         if not ws:
             return None
         if name:
-            ws.name = name
+            ws.name = name  # type: ignore[assignment]
         if description is not None:
-            ws.description = description
-        ws.updated_at = datetime.now(timezone.utc)
+            ws.description = description  # type: ignore[assignment]
+        ws.updated_at = datetime.now(timezone.utc)  # type: ignore[assignment]
         await db.commit()
         await db.refresh(ws)
         return ws
@@ -212,7 +212,7 @@ class WorkspaceService:
         member = await WorkspaceService.get_member(db, workspace_id, user_id)
         if not member:
             return None
-        member.role = new_role
+        member.role = new_role  # type: ignore[assignment]
         await db.commit()
         await db.refresh(member)
         return member
@@ -265,11 +265,11 @@ class WorkspaceService:
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)
         if expires_at < datetime.now(timezone.utc):
-            inv.status = "expired"
+            inv.status = "expired"  # type: ignore[assignment]
             await db.commit()
             return None
-        inv.status = "accepted"
-        inv.responded_at = datetime.now(timezone.utc)
+        inv.status = "accepted"  # type: ignore[assignment]
+        inv.responded_at = datetime.now(timezone.utc)  # type: ignore[assignment]
         member = WorkspaceMember(
             workspace_id=inv.workspace_id, user_id=user_id, role=inv.role
         )
@@ -283,8 +283,8 @@ class WorkspaceService:
         inv = await WorkspaceService.get_invitation_by_code(db, code)
         if not inv or inv.status != "pending":
             return None
-        inv.status = "declined"
-        inv.responded_at = datetime.now(timezone.utc)
+        inv.status = "declined"  # type: ignore[assignment]
+        inv.responded_at = datetime.now(timezone.utc)  # type: ignore[assignment]
         await db.commit()
         await db.refresh(inv)
         return inv

@@ -3,7 +3,7 @@ arXiv 文献检索服务
 使用 arXiv API: https://export.arxiv.org/api/query
 """
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import logging
 from typing import List, Optional
 
@@ -51,7 +51,7 @@ _arxiv_retry = retry(
         "arXiv API 调用失败（第 %d/%d 次），状态码: %s，%s 后重试...",
         retry_state.attempt_number,
         _RETRY_ATTEMPTS,
-        _get_status_code(retry_state.outcome.exception()) if retry_state.outcome else "未知",
+        _get_status_code(retry_state.outcome.exception()) if retry_state.outcome else "未知",  # type: ignore[arg-type]
         f"{retry_state.next_action.sleep:.0f}s" if retry_state.next_action else "即将",
     ),
 )

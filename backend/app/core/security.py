@@ -33,7 +33,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         bool: 匹配返回 True。
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)  # type: ignore[no-any-return]
 
 
 def hash_password(password: str) -> str:
@@ -45,7 +45,7 @@ def hash_password(password: str) -> str:
     Returns:
         str: bcrypt 哈希字符串。
     """
-    return pwd_context.hash(password)
+    return pwd_context.hash(password)  # type: ignore[no-any-return]
 
 
 def _generate_jti() -> str:
@@ -155,7 +155,7 @@ async def decode_token(
             from app.core.exceptions import TokenRevokedError
             raise TokenRevokedError()
 
-    return payload
+    return payload  # type: ignore[no-any-return]
 
 
 async def revoke_token(

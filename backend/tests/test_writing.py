@@ -384,8 +384,8 @@ class TestTraceAnnotationEnforcedEverywhere:
 
 # ── 引文格式测试 (P0-4) ──────────────────────
 
-from app.utils.citation_formatter import format_citation
-from app.schemas.knowledge import CitationFormat
+from app.utils.citation_formatter import format_citation  # noqa: E402
+from app.schemas.knowledge import CitationFormat  # noqa: E402
 
 
 _DEMO_PAPER = {

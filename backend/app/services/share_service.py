@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 P0-I: 分享模式 — 受控分享链接 + 水印 + 权限控制
 """
 

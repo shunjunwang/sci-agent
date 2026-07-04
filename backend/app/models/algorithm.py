@@ -6,12 +6,16 @@ M9 - 算法商城 ORM 模型
 """
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
 
 from sqlalchemy import String, Text, Integer, Float, DateTime, JSON, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.sandbox import SandboxJob  # type: ignore[attr-defined]
 
 
 def _now_utc() -> datetime:

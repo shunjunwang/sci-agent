@@ -1,11 +1,12 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 PubMed 文献检索服务
 使用 NCBI E-utilities API
 """
 
 import re
 import logging
-from datetime import datetime, timezone, date
+from datetime import date
 from typing import List, Optional
 
 import httpx

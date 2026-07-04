@@ -49,7 +49,7 @@ class HashChain:
                     broken += 1
                     anomalies.append({
                         "index": i, "log_id": log.get("id"),
-                        "reason": f"prev_hash 与上一条 current_hash 不匹配",
+                        "reason": "prev_hash 与上一条 current_hash 不匹配",
                     })
         verified = len(logs) - broken
         return {"verified": verified, "broken": broken, "anomalies": anomalies}
@@ -101,7 +101,7 @@ class AuditService:
 
         detail_json = json.dumps(action_detail, sort_keys=True, ensure_ascii=False)
         current_hash = HashChain.compute_hash(
-            prev_hash, user_id, action_type, detail_json, created_at_iso
+            prev_hash, user_id, action_type, detail_json, created_at_iso  # type: ignore[arg-type]
         )
 
         log = AuditLogM8(
@@ -133,12 +133,12 @@ class AuditService:
 
         where_clause = and_(*conditions) if conditions else True
 
-        count_stmt = select(func.count()).where(where_clause)
+        count_stmt = select(func.count()).where(where_clause)  # type: ignore[arg-type]
         total = (await db.execute(count_stmt)).scalar() or 0
 
         stmt = (
             select(AuditLogM8)
-            .where(where_clause)
+            .where(where_clause)  # type: ignore[arg-type]
             .order_by(AuditLogM8.created_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
@@ -161,13 +161,13 @@ class AuditService:
             conditions.append(AuditLogM8.created_at <= date_to)
 
         where_clause = and_(*conditions) if conditions else True
-        stmt = select(AuditLogM8).where(where_clause).order_by(AuditLogM8.created_at.asc())
+        stmt = select(AuditLogM8).where(where_clause).order_by(AuditLogM8.created_at.asc())  # type: ignore[arg-type]
         result = await db.execute(stmt)
         logs = result.scalars().all()
 
         log_dicts = [
-            {"id": l.id, "prev_hash": l.prev_hash, "current_hash": l.current_hash}
-            for l in logs
+            {"id": log.id, "prev_hash": log.prev_hash, "current_hash": log.current_hash}
+            for log in logs
         ]
 
         verify_result = HashChain.verify_chain(log_dicts)
@@ -219,7 +219,7 @@ class AuditService:
         totals = {}
         for atype in AuditService.ACTION_TYPES:
             count_stmt = select(func.count()).where(
-                where_clause, AuditLogM8.action_type == atype,
+                where_clause, AuditLogM8.action_type == atype,  # type: ignore[arg-type]
             )
             totals[f"{atype}_count"] = (await db.execute(count_stmt)).scalar() or 0
 
@@ -231,7 +231,7 @@ class AuditService:
                     AuditLogM8.action_type,
                     func.count().label("cnt"),
                 )
-                .where(where_clause)
+                .where(where_clause)  # type: ignore[arg-type]
                 .group_by(func.date(AuditLogM8.created_at), AuditLogM8.action_type)
                 .order_by(func.date(AuditLogM8.created_at))
             )
@@ -242,7 +242,7 @@ class AuditService:
                     AuditLogM8.action_type,
                     func.count().label("cnt"),
                 )
-                .where(where_clause)
+                .where(where_clause)  # type: ignore[arg-type]
                 .group_by(AuditLogM8.user_id, AuditLogM8.action_type)
                 .order_by(AuditLogM8.user_id)
             )
@@ -252,7 +252,7 @@ class AuditService:
                     AuditLogM8.action_type.label("key"),
                     func.count().label("cnt"),
                 )
-                .where(where_clause)
+                .where(where_clause)  # type: ignore[arg-type]
                 .group_by(AuditLogM8.action_type)
                 .order_by(AuditLogM8.action_type)
             )

@@ -14,7 +14,7 @@ from sqlalchemy import ForeignKey
 from app.core.database import Base, UniversalUUID
 
 if TYPE_CHECKING:
-    from app.models.user import User
+    pass
 
 
 class WritingDocument(Base):

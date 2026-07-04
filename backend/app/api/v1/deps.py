@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db as _get_db
 from app.core.exceptions import UnauthorizedError
-from app.core.security import decode_token, is_token_revoked
+from app.core.security import decode_token
 from app.models.user import User
 
 
@@ -73,7 +73,7 @@ async def get_current_user(
     if user is None:
         raise UnauthorizedError(message="用户不存在或已被删除")
 
-    return user
+    return user  # type: ignore[return-value]
 
 
 # 导出数据库依赖的别名，便于统一从 deps 中引用

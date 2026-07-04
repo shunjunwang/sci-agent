@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, List
 
-from sqlalchemy import String, Text, Integer, Float, DateTime, JSON, Boolean
+from sqlalchemy import String, Text, Integer, Float, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base

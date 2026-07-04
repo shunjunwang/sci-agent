@@ -117,12 +117,18 @@ def mock_keying():
 @pytest.mark.asyncio
 async def test_search_papers_keying_mock(auth_client, mock_keying):
     """测试科应搜索（mock）"""
-    with patch("app.services.keying_service.KeyingService._get_client", return_value=mock_keying):
-        response = await auth_client.get("/api/v2/papers/search?q=深度学习&sources=keying")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["code"] == 0
-    assert data["data"]["total"] == 100
+    from app.config import settings
+    old_val = settings.SEARCH_MOCK_MODE
+    settings.SEARCH_MOCK_MODE = False
+    try:
+        with patch("app.services.keying_service.KeyingService._get_client", return_value=mock_keying):
+            response = await auth_client.get("/api/v2/papers/search?q=深度学习&sources=keying")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["code"] == 0
+        assert data["data"]["total"] == 100
+    finally:
+        settings.SEARCH_MOCK_MODE = old_val
 
 
 @pytest.mark.asyncio

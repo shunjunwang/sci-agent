@@ -1,11 +1,12 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 M6 - Docker仿真沙箱 API v6 路由
 
 交付物来源: task-pc3-m6
 端点: POST /sandbox/run, POST /sandbox/execute, GET /sandbox/executions/{id},
       GET /sandbox/status, GET /sandbox/status/{job_uid}, POST /sandbox/stop
 """
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_db, get_current_user
@@ -30,7 +31,7 @@ async def run_code(
 
     job = await sandbox_service.execute(
         db, user_id=user_id, language=request.language,
-        code=request.code, timeout=request.timeout,
+        code=request.code, timeout=request.timeout,  # type: ignore[arg-type]
     )
 
     return APIResponse(
@@ -166,7 +167,7 @@ async def execute_code(
     # Docker 可用：委托给 sandbox_service
     job = await sandbox_service.execute(
         db, user_id=user_id, language=request.language,
-        code=request.code, timeout=request.timeout,
+        code=request.code, timeout=request.timeout,  # type: ignore[arg-type]
     )
 
     return APIResponse(

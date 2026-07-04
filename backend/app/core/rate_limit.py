@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 限流模块 — 内存 + Redis 双后端令牌桶。
 
 - 内存后端（默认）：单 worker 开发环境
@@ -204,7 +205,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 # ── 装饰器（兼容旧接口）───────────────────────────────
 
-def rate_limit(rate: int = None, capacity: int = None):
+def rate_limit(rate: int = None, capacity: int = None):  # type: ignore[assignment]
     """装饰器风格限流（兼容旧代码）。
 
     注意：多 worker 下仅内存后端有效。生产环境建议使用中间件 + Redis 后端。

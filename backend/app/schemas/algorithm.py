@@ -4,7 +4,7 @@ M9 - 算法商城 Schemas
 交付物来源: task-pc3-m9
 定义算法模板的上传、搜索、执行和评价相关的 Pydantic 模型。
 """
-from typing import Any, Optional, List
+from typing import Optional
 from datetime import datetime
 from uuid import UUID
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from app.api.v1.deps import get_current_user
-from app.core.exceptions import BadRequestError, NotFoundError
+from app.core.exceptions import BadRequestError
 from app.core.scheduler import scheduler_manager, _literature_reminder, _knowledge_backup
 from app.models.user import User
 from app.schemas.common import APIResponse

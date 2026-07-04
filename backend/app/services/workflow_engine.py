@@ -1,10 +1,10 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 P0-J: 预编排工作流引擎
 
 5 个典型科研工作流：开题 / 综述 / 复现 / 投稿 / 答辩
 """
 
-import copy
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone

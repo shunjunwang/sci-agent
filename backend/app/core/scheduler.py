@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 定时任务调度器 — 基于 APScheduler。
 
 提供 BackgroundScheduler 单例 + 任务管理封装。
@@ -8,7 +9,7 @@
 import logging
 import warnings
 from datetime import datetime, timezone
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -128,7 +129,7 @@ class SchedulerManager:
             kwargs=kwargs,
             replace_existing=True,
         )
-        return job.id
+        return job.id  # type: ignore[no-any-return]
 
     def remove_job(self, job_id: str) -> bool:
         """删除定时任务。

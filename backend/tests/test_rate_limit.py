@@ -20,31 +20,38 @@ class FakeApp:
     pass
 
 
-@pytest.mark.skip(reason="RateLimitMiddleware API changed: __init__ only takes app, _allow_request removed")
 def test_rate_limit_allow():
     """测试正常请求通过限流"""
-    middleware = RateLimitMiddleware(FakeApp())
+    from app.core.rate_limit import _memory_allow_request
+    ip = "127.0.0.1"
     for _ in range(3):
-        assert middleware._allow_request("127.0.0.1") is True
+        allowed, retry = _memory_allow_request(ip, rate_per_min=60, burst=120)
+        assert allowed is True
+        assert retry == 0.0
 
 
-@pytest.mark.skip(reason="RateLimitMiddleware API changed: __init__ only takes app, _allow_request removed")
 def test_rate_limit_exceed():
     """测试超过限制后被拒绝"""
-    middleware = RateLimitMiddleware(FakeApp())
-    assert middleware._allow_request("192.168.1.1") is True
-    assert middleware._allow_request("192.168.1.1") is True
-    assert middleware._allow_request("192.168.1.1") is False
+    from app.core.rate_limit import _memory_allow_request
+    ip = "192.168.1.1"
+    allowed, _ = _memory_allow_request(ip, rate_per_min=1, burst=1)
+    assert allowed is True
+    allowed, retry = _memory_allow_request(ip, rate_per_min=1, burst=1)
+    assert allowed is False
+    assert retry > 0
 
 
-@pytest.mark.skip(reason="RateLimitMiddleware API changed: __init__ only takes app, _allow_request removed")
 def test_rate_limit_per_ip():
     """测试不同 IP 独立限流"""
-    middleware = RateLimitMiddleware(FakeApp(), rate=60, capacity=1)
-    assert middleware._allow_request("10.0.0.1") is True
-    assert middleware._allow_request("10.0.0.1") is False
+    from app.core.rate_limit import _memory_allow_request
+    # burst=1 使每个 IP 最多 1 次请求
+    allowed, _ = _memory_allow_request("10.0.0.1", rate_per_min=60, burst=1)
+    assert allowed is True
+    allowed, _ = _memory_allow_request("10.0.0.1", rate_per_min=60, burst=1)
+    assert allowed is False
     # 另一个 IP 不受影响
-    assert middleware._allow_request("10.0.0.2") is True
+    allowed, _ = _memory_allow_request("10.0.0.2", rate_per_min=60, burst=1)
+    assert allowed is True
 
 
 def test_rate_limit_get_client_ip():

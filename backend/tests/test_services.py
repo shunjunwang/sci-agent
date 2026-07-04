@@ -201,6 +201,16 @@ def test_cli_registry_list_sources():
 
 # ---- 搜索聚合服务测试 ----
 
+@pytest.fixture(autouse=True)
+def _disable_search_mock_mode():
+    """禁用 SEARCH_MOCK_MODE，避免搜索聚合测试走 DB 查询路径。"""
+    from app.config import settings
+    old_val = settings.SEARCH_MOCK_MODE
+    settings.SEARCH_MOCK_MODE = False
+    yield
+    settings.SEARCH_MOCK_MODE = old_val
+
+
 @pytest.mark.asyncio
 async def test_search_service_aggregate():
     """测试搜索聚合服务（仅 cnki，不依赖外部 API）"""

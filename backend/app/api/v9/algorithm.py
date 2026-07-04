@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 M9 - 算法商城 API v9 路由
 
 端点:
@@ -9,7 +10,6 @@ M9 - 算法商城 API v9 路由
 - GET  /executions/{execution_id}     执行详情
 """
 import math
-import os
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
@@ -21,7 +21,6 @@ from app.schemas.common import APIResponse
 from app.services.algorithm_service import algorithm_service
 from app.models.user import User
 
-from app.api.v1.deps import get_current_user
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 

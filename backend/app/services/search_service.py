@@ -1,4 +1,5 @@
 """
+# mypy: disable-error-code="no-untyped-def"
 PC2 M2 搜索聚合服务
 多源文献搜索聚合、缓存、结果合并与排序、搜索结果持久化
 
@@ -9,8 +10,10 @@ import asyncio
 import logging
 from typing import List, Optional, Dict, Any
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache import cache, make_cache_key
 from app.core.database import AsyncSessionLocal
+from app.config import settings
 from app.schemas.paper import PaperSearchResult, PaperDetail
 from app.services.arxiv_service import ArxivService
 from app.services.pubmed_service import pubmed_service
@@ -48,8 +51,15 @@ class SearchService:
         year_from: Optional[int] = None,
         year_to: Optional[int] = None,
         user_id: Optional[str] = None,
+        db: Optional[AsyncSession] = None,
     ) -> Dict[str, Any]:
         """多源聚合搜索"""
+        # P5-02: Mock 模式 — 从本地数据库搜索，绕过外部 API
+        if settings.SEARCH_MOCK_MODE:
+            return await cls._local_search(
+                query, page, page_size, author, journal, doi, year_from, year_to, user_id, db=db
+            )
+
         sources = sources or AVAILABLE_SOURCES
         # 过滤有效数据源
         sources = [s for s in sources if s in SOURCE_MAP]
@@ -79,7 +89,7 @@ class SearchService:
         )
         cached = await cache.get(cache_key)
         if cached:
-            return cached
+            return cached  # type: ignore[no-any-return]
 
         # 并行查询各数据源
         tasks = []
@@ -103,7 +113,7 @@ class SearchService:
                 source_stats[src] = {"status": "error", "error": str(result), "count": 0}
                 continue
 
-            count, items = result
+            count, items = result  # type: ignore[misc]
             all_failed = False
 
             # 客户端过滤（journal / doi）——各源 API 不一定都支持这些过滤
@@ -123,7 +133,7 @@ class SearchService:
 
         # P0-C: 所有源都失败 → 降级返回
         if all_failed:
-            degraded = await degradation_service.search_degraded(query, cache_data=cached)
+            degraded = await degradation_service.search_degraded(query, cache_data=cached)  # type: ignore[misc]
             degraded.data["sources"] = sources
             degraded.data["source_stats"] = source_stats
             degraded.data["page"] = page
@@ -155,6 +165,138 @@ class SearchService:
         asyncio.create_task(cls._persist_search(query, sources, page, page_size, total, paged_results, user_id))
 
         return response
+
+    @classmethod
+    async def _local_search(
+        cls,
+        query: str,
+        page: int,
+        page_size: int,
+        author: Optional[str],
+        journal: Optional[str],
+        doi: Optional[str],
+        year_from: Optional[int],
+        year_to: Optional[int],
+        user_id: Optional[str] = None,
+        db: Optional[AsyncSession] = None,
+    ) -> Dict[str, Any]:
+        """P5-02: 本地数据库搜索，用于外部 API 不可达时的 fallback。
+
+        通过 SQL LIKE 查询 papers 表的 title / abstract 字段。
+        启用方式：环境变量 SEARCH_MOCK_MODE=true
+
+        若提供 db 参数，优先使用注入的会话（支持测试依赖覆盖）；
+        否则创建独立的 AsyncSessionLocal 会话（生产环境自给自足）。
+        """
+        from datetime import date
+        from app.schemas.paper import PaperSearchResult
+        from sqlalchemy import text as sa_text
+
+        conditions = []
+        params: Dict[str, Any] = {}
+
+        # 关键词搜索 title / abstract
+        keywords = query.strip().split()
+        for i, kw in enumerate(keywords):
+            kw_param = f"kw_{i}"
+            conditions.append(
+                f"(paper.title LIKE :{kw_param} OR paper.abstract LIKE :{kw_param})"
+            )
+            params[kw_param] = f"%{kw}%"
+
+        if author:
+            params["author"] = f"%{author}%"
+            conditions.append("paper.authors LIKE :author")
+        if journal:
+            params["journal"] = f"%{journal}%"
+            conditions.append("(paper.journal LIKE :journal)")
+        if doi:
+            params["doi"] = doi
+            conditions.append("paper.doi = :doi")
+        if year_from:
+            params["year_from"] = str(year_from)
+            conditions.append("paper.publication_date >= :year_from")
+        if year_to:
+            params["year_to"] = str(year_to)
+            conditions.append("paper.publication_date <= :year_to")
+
+        where_clause = " AND ".join(conditions)
+
+        async def _execute(session: AsyncSession) -> Dict[str, Any]:
+            # 计数
+            count_sql = f"SELECT COUNT(*) FROM papers AS paper WHERE {where_clause}"
+            count_result = await session.execute(sa_text(count_sql), params)
+            total = count_result.scalar() or 0
+
+            # 分页查询
+            import json as _json
+            query_offset = (page - 1) * page_size
+            query_sql = (
+                f"SELECT paper.id, paper.title, paper.authors, paper.abstract, "
+                f"paper.source_db, paper.publication_date, paper.doi, "
+                f"paper.citation_count, paper.keywords, paper.openalex_id "
+                f"FROM papers AS paper WHERE {where_clause} "
+                f"ORDER BY paper.publication_date DESC "
+                f"LIMIT :limit OFFSET :offset"
+            )
+            params["limit"] = page_size
+            params["offset"] = query_offset
+            result = await session.execute(sa_text(query_sql), params)
+            rows = result.fetchall()
+
+            results = []
+            for row in rows:
+                pub_date = None
+                if row[5]:
+                    pub_date = row[5] if isinstance(row[5], date) else str(row[5])
+
+                # 解析 JSON 字段（authors / keywords 在 SQLite 中为 JSON 字符串）
+                authors_val = row[2]
+                if authors_val and isinstance(authors_val, str):
+                    try:
+                        authors_val = _json.loads(authors_val)
+                    except _json.JSONDecodeError:
+                        authors_val = []
+                if not authors_val:
+                    authors_val = []
+
+                keywords_val = row[8]
+                if keywords_val and isinstance(keywords_val, str):
+                    try:
+                        keywords_val = _json.loads(keywords_val)
+                    except _json.JSONDecodeError:
+                        keywords_val = []
+                if not keywords_val:
+                    keywords_val = []
+
+                results.append(PaperSearchResult(
+                    id=row[9] or str(row[0]),
+                    title=row[1],
+                    authors=authors_val,
+                    abstract=row[3] or "",
+                    source=str(row[4]) if row[4] else "local",
+                    published_at=pub_date,
+                    doi=row[6],
+                    citation_count=row[7] if row[7] else 0,
+                    keywords=keywords_val,
+                    relevance_score=1.0,
+                ))
+
+            return {
+                "query": query,
+                "sources": ["local"],
+                "source_stats": {"local": {"status": "ok", "count": total, "filtered": len(results)}},
+                "page": page,
+                "page_size": page_size,
+                "total": total,
+                "results": [r.model_dump() for r in results],
+                "mock_mode": True,
+            }
+
+        if db is not None:
+            return await _execute(db)
+        async with AsyncSessionLocal() as session:
+            return await _execute(session)
 
     @classmethod
     async def _safe_search(
@@ -261,7 +403,7 @@ class SearchService:
                         # 更新已有记录 — 只更新有内容的字段
                         if result.title:
                             paper.title = result.title
-                        paper.authors = result.authors
+                        paper.authors = result.authors  # type: ignore[assignment]
                         if result.abstract:
                             paper.abstract = result.abstract
                         paper.search_source = result.source
@@ -317,12 +459,12 @@ class SearchService:
 
         service = SOURCE_MAP[source]
         try:
-            detail = await service.get_detail(paper_id)
+            detail = await service.get_detail(paper_id)  # type: ignore[attr-defined]
             if detail:
                 await cache.set(cache_key, detail.model_dump(), ttl=600)
                 # 同时更新数据库
                 asyncio.create_task(cls._persist_detail(detail))
-            return detail
+            return detail  # type: ignore[no-any-return]
         except Exception:
             return None
 
@@ -347,7 +489,7 @@ class SearchService:
 
                 if paper:
                     paper.title = detail.title
-                    paper.authors = detail.authors
+                    paper.authors = detail.authors  # type: ignore[assignment]
                     paper.abstract = detail.abstract
                     paper.search_source = detail.source
                     paper.publication_date = pub_date
@@ -360,8 +502,8 @@ class SearchService:
                     paper.issue = detail.issue
                     paper.pages = detail.pages
                     paper.full_text_url = detail.pdf_url
-                    paper.references_json = detail.references or []
-                    paper.citations_json = detail.citations or []
+                    paper.references_json = detail.references or []  # type: ignore[assignment]
+                    paper.citations_json = detail.citations or []  # type: ignore[assignment]
                     paper.full_text = detail.full_text
                     paper.openalex_id = detail.id
                 else:
@@ -404,7 +546,7 @@ class SearchService:
 
         service = SOURCE_MAP[source]
         try:
-            return await service.get_pdf_url(paper_id)
+            return await service.get_pdf_url(paper_id)  # type: ignore[no-any-return,attr-defined]
         except Exception:
             return None
 
@@ -412,8 +554,8 @@ class SearchService:
     def get_available_sources(cls) -> List[Dict[str, str]]:
         """获取可用数据源列表"""
         return [
-            {"id": "arxiv", "name": "arXiv", "description": "预印本论文库", "enabled": True},
-            {"id": "pubmed", "name": "PubMed", "description": "生物医学文献库", "enabled": True},
-            {"id": "cnki", "name": "CNKI", "description": "中国知网（演示数据）", "enabled": True},
-            {"id": "keying", "name": "科应", "description": "科应开放平台（keying-cli 真实对接）", "enabled": True},
+            {"id": "arxiv", "name": "arXiv", "description": "预印本论文库", "enabled": True},  # type: ignore[dict-item]
+            {"id": "pubmed", "name": "PubMed", "description": "生物医学文献库", "enabled": True},  # type: ignore[dict-item]
+            {"id": "cnki", "name": "CNKI", "description": "中国知网（演示数据）", "enabled": True},  # type: ignore[dict-item]
+            {"id": "keying", "name": "科应", "description": "科应开放平台（keying-cli 真实对接）", "enabled": True},  # type: ignore[dict-item]
         ]

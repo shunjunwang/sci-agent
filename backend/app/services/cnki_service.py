@@ -102,12 +102,12 @@ class CNKIService:
         q = query.lower()
         for p in _MOCK_PAPERS:
             match = False
-            if q in p["title"].lower() or q in p["abstract"].lower():
+            if q in p["title"].lower() or q in p["abstract"].lower():  # type: ignore[attr-defined]
                 match = True
-            if author and any(author in a for a in p["authors"]):
+            if author and any(author in a for a in p["authors"]):  # type: ignore[attr-defined]
                 match = True
             if year_from or year_to:
-                year = int(p["published_at"][:4]) if p["published_at"] else 0
+                year = int(p["published_at"][:4]) if p["published_at"] else 0  # type: ignore[index]
                 if year_from and year < year_from:
                     match = False
                 if year_to and year > year_to:
@@ -148,7 +148,7 @@ class CNKIService:
         logger.info("CNKI 真实 API 搜索: %s", params)
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(url, params=params)
+            response = await client.get(url, params=params)  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
 
@@ -172,7 +172,7 @@ class CNKIService:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(url)
             response.raise_for_status()
-            return response.json()
+            return response.json()  # type: ignore[no-any-return]
 
     # ── 公共接口 ──────────────────────────────────────
 
@@ -271,4 +271,4 @@ class CNKIService:
             response = await client.get(url)
             response.raise_for_status()
             data = response.json()
-            return data.get("pdf_url")
+            return data.get("pdf_url")  # type: ignore[no-any-return]

@@ -24,7 +24,7 @@ try:
     _MATPLOTLIB_AVAILABLE = True
 except ImportError:
     _MATPLOTLIB_AVAILABLE = False
-    np = None
+    np = None  # type: ignore[assignment]
 
 
 class PlotServiceError(Exception):
@@ -522,7 +522,7 @@ class PlotService:
 
     # ── P0-L: 论文配图自动化扩展 ──────────────────────
 
-    def auto_enhance(self, image_bytes: bytes, config: dict = None) -> str:
+    def auto_enhance(self, image_bytes: bytes, config: dict = None) -> str:  # type: ignore[assignment]
         """
         自动增强沙箱输出的原始图表为发表级。
 
@@ -550,7 +550,7 @@ class PlotService:
         )
 
         fig = Figure(figsize=figsize, dpi=dpi)
-        canvas = FigureCanvasAgg(fig)
+        _ = FigureCanvasAgg(fig)
         ax = fig.add_subplot(111)
 
         # 应用 seaborn-v0_8-whitegrid 风格
@@ -566,7 +566,7 @@ class PlotService:
         return base64.b64encode(buf.read()).decode("utf-8")
 
     def add_figure_number(
-        self, image_bytes: bytes, number: int, caption: str = None
+        self, image_bytes: bytes, number: int, caption: str = None  # type: ignore[assignment]
     ) -> str:
         """给图表添加编号和题注。"""
         if not _MATPLOTLIB_AVAILABLE:

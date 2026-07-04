@@ -132,7 +132,7 @@ class DegradationService:
             suggestions = [
                 "优化代码，减少数据规模或迭代次数",
                 "检查是否陷入死循环",
-                f"当前超时限制：300 秒，可考虑分步执行",
+                "当前超时限制：300 秒，可考虑分步执行",
             ]
         else:
             warnings.append(
