@@ -15,7 +15,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     Promise.allSettled([
-      api.get('/api/v1/papers/history?limit=5').catch(() => ({ data: [] })),
+      api.get('/api/v2/papers/history?limit=5').catch(() => ({ data: [] })),
       api.get('/api/v3/library/entries?limit=5').catch(() => ({ data: [] })),
       api.get('/api/v5/writing/documents?limit=5').catch(() => ({ data: [] })),
     ]).then(([papersR, libR, writingR]) => {

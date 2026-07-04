@@ -45,7 +45,7 @@ export default function SettingsPage() {
           <CardContent>
             {section === 'profile' && (
               <div className="space-y-4">
-                <div><Label>用户名</Label><Input defaultValue={user?.username || ''} /></div>
+                <div><Label>姓名</Label><Input defaultValue={user?.full_name || ''} /></div>
                 <div><Label>邮箱</Label><Input defaultValue={user?.email || ''} disabled /></div>
                 <div><Label>新密码</Label><Input type="password" placeholder="留空不修改" /></div>
                 <Button onClick={() => setSaved(true)}>保存修改</Button>

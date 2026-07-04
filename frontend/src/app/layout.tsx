@@ -108,11 +108,11 @@ function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8"><AvatarFallback className="bg-slate-700 text-white text-xs">{user?.username?.slice(0, 2).toUpperCase() || 'U'}</AvatarFallback></Avatar>
+              <Avatar className="h-8 w-8"><AvatarFallback className="bg-slate-700 text-white text-xs">{user?.full_name?.slice(0, 2).toUpperCase() || 'U'}</AvatarFallback></Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel><div className="flex flex-col"><span>{user?.username || '用户'}</span><span className="text-xs text-muted-foreground">{user?.email}</span></div></DropdownMenuLabel>
+            <DropdownMenuLabel><div className="flex flex-col"><span>{user?.full_name || '用户'}</span><span className="text-xs text-muted-foreground">{user?.email}</span></div></DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild><Link href="/settings">设置</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
